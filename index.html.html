@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>チームダッシュボード</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#0f1117; --bg2:#181c27; --bg3:#1f2435;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#e8eaf0; --muted:#7a8099;
+  --accent:#4f8ef7; --accent2:#38d9a9; --accent3:#f7a84f;
+  --danger:#f06f6f; --win:#38d9a9; --lose:#f06f6f;
+  --mono:'DM Mono',monospace; --sans:'Noto Sans JP',sans-serif;
+  --radius:10px; --radius-lg:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:200px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{flex:1;min-width:0;padding:32px 36px}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-title{font-size:18px;font-weight:700;letter-spacing:.08em;color:var(--accent3);font-family:var(--mono)}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.nav-section{padding:0 12px;margin-bottom:8px}
+.nav-label{font-size:10px;letter-spacing:.1em;color:var(--muted);font-family:var(--mono);padding:0 8px;margin-bottom:4px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:var(--sans)}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(79,142,247,.12);color:var(--accent);font-weight:500}
+.nav-icon{width:16px;text-align:center;font-size:15px}
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px;transition:opacity .4s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.error-msg{background:rgba(240,111,111,.1);border:1px solid rgba(240,111,111,.3);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;color:var(--lose);font-size:13px;white-space:pre-wrap;display:none}
+.error-msg.show{display:block}
+.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:28px}
+.page-title{font-size:22px;font-weight:700;color:var(--text)}
+.page-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:24px}
+.filter-label{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:4px}
+select{background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:6px 12px;font-size:13px;font-family:var(--sans);cursor:pointer;outline:none;transition:border-color .15s}
+select:focus{border-color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-color,var(--accent))}
+.stat-label{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.stat-val{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
+.score-banner{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.score-main{display:flex;align-items:center;gap:16px}
+.score-num{font-family:var(--mono);font-size:48px;font-weight:700;line-height:1}
+.score-us{color:var(--accent)}.score-opp{color:var(--muted)}
+.score-sep{font-family:var(--mono);font-size:24px;color:var(--border2)}
+.badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:.06em}
+.badge-win{background:rgba(56,217,169,.15);color:var(--win);border:1px solid rgba(56,217,169,.25)}
+.badge-lose{background:rgba(240,111,111,.15);color:var(--lose);border:1px solid rgba(240,111,111,.25)}
+.badge-draw{background:rgba(247,168,79,.15);color:var(--accent3);border:1px solid rgba(247,168,79,.25)}
+.score-meta{margin-left:auto;text-align:right}
+.score-meta .opponent{font-size:15px;font-weight:500;color:var(--text)}
+.score-meta .date{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.section-head{font-size:12px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-head::after{content:'';flex:1;height:1px;background:var(--border)}
+.table-wrap{overflow-x:auto;margin-bottom:24px;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+thead th{padding:10px 12px;text-align:left;font-size:11px;font-family:var(--mono);font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2)}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.03)}
+tbody tr.top-row td{background:rgba(79,142,247,.06)}
+.num{text-align:right;font-family:var(--mono)}
+.player-name{font-weight:500}
+.pnum{color:var(--muted);font-family:var(--mono);font-size:12px}
+.pm-pos{color:var(--win);font-family:var(--mono)}
+.pm-neg{color:var(--lose);font-family:var(--mono)}
+.bar-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-name{font-size:13px;color:var(--text);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:var(--bg3);border-radius:4px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.bar-val{font-family:var(--mono);font-size:13px;color:var(--text);width:40px;text-align:right;flex-shrink:0}
+.bar-rank{font-size:11px;color:var(--muted);font-family:var(--mono);width:28px;text-align:right;flex-shrink:0}
+.chart-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.lineup-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.lineup-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.lineup-players{display:flex;gap:8px;flex-wrap:wrap}
+.player-chip{padding:4px 12px;border-radius:999px;background:var(--bg3);border:1px solid var(--border2);font-size:12px;color:var(--text)}
+.lineup-stats{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.lineup-stat-item{font-size:12px;color:var(--muted)}
+.lineup-stat-item b{color:var(--text);font-weight:500}
+.diff-badge{font-family:var(--mono);font-size:13px;font-weight:700;padding:2px 10px;border-radius:6px}
+.diff-pos{background:rgba(56,217,169,.12);color:var(--win)}
+.diff-neg{background:rgba(240,111,111,.12);color:var(--lose)}
+.diff-zero{background:rgba(122,128,153,.15);color:var(--muted)}
+.empty-state{padding:40px;text-align:center;color:var(--muted);font-size:13px;font-family:var(--mono)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+@media(max-width:768px){.sidebar{display:none}.main{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">スプレッドシートからデータを読み込み中...</div>
+</div>
+
+<div class="shell">
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-title">HAMACHE</div>
+    <div class="logo-sub">2026シーズン</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">メニュー</div>
+    <button class="nav-item active" onclick="navigate('game',this)"><span class="nav-icon">🏀</span>試合分析</button>
+    <button class="nav-item" onclick="navigate('player',this)"><span class="nav-icon">👤</span>選手個人</button>
+    <button class="nav-item" onclick="navigate('lineup',this)"><span class="nav-icon">👥</span>ラインアップ</button>
+    <button class="nav-item" onclick="navigate('team',this)"><span class="nav-icon">📊</span>チーム全体</button>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- 試合分析 -->
+<div id="page-game" class="page active">
+  <div class="page-header"><div class="page-title">試合分析</div><div class="page-sub">試合ごとのチーム・選手スタッツを確認</div></div>
+  <div id="err-game" class="error-msg"></div>
+  <div class="filter-bar">
+    <span class="filter-label">試合</span>
+    <select id="sel-game" onchange="updateGame()"></select>
+    <span class="filter-label">カテゴリー</span>
+    <select id="sel-game-cat" onchange="updateGame()"><option value="">全カテゴリー</option></select>
+  </div>
+  <div class="score-banner">
+    <div class="score-main">
+      <div class="score-num score-us" id="score-us">—</div>
+      <div class="score-sep">—</div>
+      <div class="score-num score-opp" id="score-opp">—</div>
+      <span class="badge" id="score-badge">—</span>
+    </div>
+    <div class="score-meta">
+      <div class="opponent" id="score-opponent">—</div>
+      <div class="date" id="score-date">—</div>
+    </div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">FG%</div><div class="stat-val" id="g-fgp">—</div><div class="stat-sub">相手 <span id="g-opp-fgp">—</span>%</div></div>
+    <div class="stat-card" style="--accent-color:var(--danger)"><div class="stat-label">TO%</div><div class="stat-val" id="g-top">—</div><div class="stat-sub">相手 <span id="g-opp-top">—</span>%</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent2)"><div class="stat-label">OR%</div><div class="stat-val" id="g-orp">—</div><div class="stat-sub">相手 <span id="g-opp-orp">—</span>%</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent3)"><div class="stat-label">PACE</div><div class="stat-val" id="g-pace">—</div><div class="stat-sub">possession/40min</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent2)"><div class="stat-label">Team PPP</div><div class="stat-val" id="g-ppp">—</div><div class="stat-sub">相手 <span id="g-opp-ppp">—</span></div></div>
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">FTR</div><div class="stat-val" id="g-ftr">—</div><div class="stat-sub">相手 <span id="g-opp-ftr">—</span></div></div>
+  </div>
+  <div class="section-head">選手スタッツ（この試合・全ピリオド合算）</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>選手名</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>FG%</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>BLK</th><th>+/−</th><th>EFF</th><th>USG%</th></tr></thead>
+      <tbody id="game-player-tbody"><tr><td colspan="17" class="empty-state">読み込み中...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 選手個人 -->
+<div id="page-player" class="page">
+  <div class="page-header"><div class="page-title">選手個人スタッツ</div><div class="page-sub">選手を選んでシーズン成績・推移を確認</div></div>
+  <div class="filter-bar">
+    <span class="filter-label">選手</span>
+    <select id="sel-player" onchange="updatePlayer()"></select>
+    <span class="filter-label">カテゴリー</span>
+    <select id="sel-player-cat" onchange="updatePlayer()"><option value="">全カテゴリー</option></select>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">平均得点</div><div class="stat-val" id="p-pts">—</div><div class="stat-sub" id="p-pts-sub">—</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent2)"><div class="stat-label">eFG%</div><div class="stat-val" id="p-efg">—</div><div class="stat-sub">FT% <span id="p-ftp">—</span>%</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent3)"><div class="stat-label">USG%</div><div class="stat-val" id="p-usg">—</div><div class="stat-sub">使用率</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">EFF</div><div class="stat-val" id="p-eff">—</div><div class="stat-sub">効率指標</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent2)"><div class="stat-label">PPP</div><div class="stat-val" id="p-ppp">—</div><div class="stat-sub">Points Per Poss</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent3)"><div class="stat-label">+/− 平均</div><div class="stat-val" id="p-pm">—</div><div class="stat-sub">出場時得失点差</div></div>
+  </div>
+  <div class="section-head">スタッツ比較（チーム内ランク）</div>
+  <div id="player-bars" class="bar-list"></div>
+  <div class="section-head">得点推移（試合ごと）</div>
+  <div class="chart-wrap"><canvas id="playerChart" height="120"></canvas></div>
+  <div class="section-head">試合別詳細</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>日付</th><th>対戦相手</th><th>結果</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>EFF</th><th>+/−</th></tr></thead>
+      <tbody id="player-game-tbody"><tr><td colspan="15" class="empty-state">選手を選択してください</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ラインアップ -->
+<div id="page-lineup" class="page">
+  <div class="page-header"><div class="page-title">ラインアップ分析</div><div class="page-sub">5人の組み合わせごとの得失点差を確認</div></div>
+  <div class="filter-bar">
+    <span class="filter-label">試合</span>
+    <select id="sel-lineup-game" onchange="updateLineup()"></select>
+    <span class="filter-label">ピリオド</span>
+    <select id="sel-lineup-period" onchange="updateLineup()">
+      <option value="">全ピリオド</option>
+      <option value="1Q">1Q</option><option value="2Q">2Q</option>
+      <option value="3Q">3Q</option><option value="4Q">4Q</option>
+    </select>
+  </div>
+  <div class="section-head">ラインアップ別成績（得失点差 降順）</div>
+  <div class="lineup-list" id="lineup-list"><div class="empty-state">試合を選択してください</div></div>
+</div>
+
+<!-- チーム全体 -->
+<div id="page-team" class="page">
+  <div class="page-header"><div class="page-title">チーム全体</div><div class="page-sub">シーズン通算の成績と傾向</div></div>
+  <div class="filter-bar">
+    <span class="filter-label">カテゴリー</span>
+    <select id="sel-team-cat" onchange="updateTeam()"><option value="">全カテゴリー</option></select>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card" style="--accent-color:var(--win)"><div class="stat-label">勝敗</div><div class="stat-val" id="t-record">—</div><div class="stat-sub" id="t-winrate">—</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">平均得点</div><div class="stat-val" id="t-pts">—</div><div class="stat-sub" id="t-opp-pts">—</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent2)"><div class="stat-label">チームFG%</div><div class="stat-val" id="t-fgp">—</div><div class="stat-sub" id="t-opp-fgp">—</div></div>
+    <div class="stat-card" style="--accent-color:var(--danger)"><div class="stat-label">平均TO</div><div class="stat-val" id="t-to">—</div><div class="stat-sub" id="t-opp-to">—</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent3)"><div class="stat-label">平均OR%</div><div class="stat-val" id="t-orp">—</div><div class="stat-sub" id="t-opp-orp">—</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">平均PPP</div><div class="stat-val" id="t-ppp">—</div><div class="stat-sub" id="t-opp-ppp">—</div></div>
+  </div>
+  <div class="section-head">得点ランキング（シーズン平均）</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>順位</th><th>選手</th><th>試合数</th><th>PTS</th><th>FG%</th><th>eFG%</th><th>FT%</th><th>USG%</th><th>EFF</th><th>PPP</th><th>+/−</th></tr></thead>
+      <tbody id="team-rank-tbody"><tr><td colspan="11" class="empty-state">読み込み中...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="section-head">得点・失点推移（全試合）</div>
+  <div class="chart-wrap"><canvas id="teamChart" height="140"></canvas></div>
+</div>
+
+</main>
+</div>
+
+<script>
+/* ========================================
+   設定 — ここだけ変更すればOK
+   ======================================== */
+const SHEET_ID  = '1Q2c9BHrUHJB3dX2LpC7LJsVXgQqj5F_HLjrROHsRxl8';
+const API_KEY   = 'AIzaSyDDG3PeoGS6_0QBEo-H8VxKBU3XvrUJjhw';
+const SH_GAME   = 'DB_Game_1';
+const SH_LINEUP = 'DB_Lineup_2';
+const SH_PLAYER = 'DB_Player_3';
+
+/* ========================================
+   データ取得
+   ======================================== */
+async function fetchSheet(name) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(name)}?key=${API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || `HTTP ${res.status}`); }
+  const { values = [] } = await res.json();
+  console.log(`${name}: 取得行数=${values.length}`);
+  if (values.length < 2) return [];
+  const h = values[0].map(s => s.trim());
+  return values.slice(1).map(row => Object.fromEntries(h.map((k,i) => [k, (row[i]||'').trim()])));
+}
+
+const n = v => { const x=parseFloat(v); return isNaN(x)?0:x; };
+const f = (v,d=1) => { const x=parseFloat(v); return isNaN(x)?'—':x.toFixed(d); };
+const avg = (arr,k) => { const v=arr.map(r=>n(r[k])).filter(x=>x||x===0); return v.length?v.reduce((a,b)=>a+b,0)/v.length:0; };
+// スプレッドシートの改行入り列名をフラット化して検索
+function col(obj, ...parts) {
+  for (const k of Object.keys(obj)) {
+    const flat = k.replace(/[\s\n_]/g,'').toLowerCase();
+    if (parts.every(p => flat.includes(p.replace(/[_\s]/g,'').toLowerCase()))) return obj[k];
+  }
+  return '';
+}
+
+/* ========================================
+   グローバルデータ
+   ======================================== */
+let D = { game:[], lineup:[], player:[] };
+let chartP = null, chartT = null;
+
+/* ========================================
+   初期化
+   ======================================== */
+async function init() {
+  try {
+    const [game, lineup, player] = await Promise.all([fetchSheet(SH_GAME), fetchSheet(SH_LINEUP), fetchSheet(SH_PLAYER)]);
+    D = { game, lineup, player };
+    // デバッグ：実際の列名をコンソールに出力
+    if(game.length)   console.log('DB_Game_1 列名:',   Object.keys(game[0]));
+    if(lineup.length) console.log('DB_Lineup_2 列名:', Object.keys(lineup[0]));
+    if(lineup.length) console.log('DB_Lineup_2 サンプル行:', lineup[0]);
+    buildFilters();
+    updateGame();
+    updateTeam();
+  } catch(e) {
+    const el = document.getElementById('err-game');
+    el.textContent = `データ読み込みエラー:\n${e.message}\n\n確認事項:\n・スプレッドシートの共有設定が「リンクを知っている全員が閲覧可」になっているか\n・シート名が正しいか（DB_Game_1 / DB_Lineup_2 / DB_Player_3）`;
+    el.classList.add('show');
+  } finally {
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+/* ========================================
+   フィルター構築
+   ======================================== */
+function buildFilters() {
+  // 日付降順（新しい試合が上）でインデックスを保持
+  const gamesSorted = D.game.map((g,i)=>({g,i})).sort((a,b)=>{
+    const da = a.g['DATE']||'', db = b.g['DATE']||'';
+    return db.localeCompare(da);
+  });
+  const gameOpts = gamesSorted.map(({g,i}) => `<option value="${i}">${g['GameID']} — ${g['DATE']} vs ${g['対戦相手']}</option>`).join('');
+  document.getElementById('sel-game').innerHTML = gameOpts;
+  document.getElementById('sel-lineup-game').innerHTML = gameOpts;
+
+  // 選手を#番号順に並べる（同名は最初の出現行の番号を使用）
+  const nameNumMap = {};
+  D.player.forEach(r => {
+    const nm = r['コートネーム']; if(!nm) return;
+    if(nameNumMap[nm] === undefined) nameNumMap[nm] = parseInt(r['#'])||999;
+  });
+  const names = Object.keys(nameNumMap).sort((a,b) => nameNumMap[a] - nameNumMap[b]);
+  document.getElementById('sel-player').innerHTML = names.map(nm=>`<option value="${nm}">#${nameNumMap[nm]} ${nm}</option>`).join('');
+
+  const cats = [...new Set(D.game.map(r=>r['Category']).filter(Boolean))];
+  const catOpts = '<option value="">全カテゴリー</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  ['sel-game-cat','sel-player-cat','sel-team-cat'].forEach(id => document.getElementById(id).innerHTML = catOpts);
+}
+
+/* ========================================
+   試合分析
+   ======================================== */
+function updateGame() {
+  const idx = parseInt(document.getElementById('sel-game').value||0);
+  const g = D.game[idx]; if(!g) return;
+
+  // スコアバナー
+  const us  = g['Team_\nPTS'];
+  const op  = g['Opp_\nPTS'];
+  const res = (g['勝敗\n(WIN / LOSE / DRAW)']||'').toUpperCase();
+  document.getElementById('score-us').textContent = us||'—';
+  document.getElementById('score-opp').textContent = op||'—';
+  document.getElementById('score-opponent').textContent = 'vs ' + (g['対戦相手']||'—');
+  document.getElementById('score-date').textContent = (g['DATE']||'—').replace(/\//g,' / ');
+  const badge = document.getElementById('score-badge');
+  badge.textContent = res||'—';
+  badge.className = 'badge ' + (res==='WIN'?'badge-win':res==='LOSE'?'badge-lose':'badge-draw');
+
+  // 実際の列名で直接参照
+  const sv = (id, key, dec=1) => { document.getElementById(id).textContent = f(g[key], dec)||'—'; };
+  sv('g-fgp',  'Team\n_FG%');   sv('g-top',  'Team\n_TO%');  sv('g-orp',  'Team\n_OR%');
+  sv('g-pace', 'PACE');          sv('g-ppp',  'Team\n_PPP', 2); sv('g-ftr', 'Team\n_FTR');
+  sv('g-opp-fgp','Opp_\nFG%'); sv('g-opp-top','Opp_\nTO%'); sv('g-opp-orp','Opp_\nOR%');
+  sv('g-opp-ppp','Opp_\nPPP',2); sv('g-opp-ftr','Opp_\nFTR');
+
+  // 選手テーブル
+  const rows = D.player.filter(r=>r['GameID']===g['GameID']);
+  renderGamePlayers(mergeByName(rows));
+}
+
+function mergeByName(rows) {
+  const m = {};
+  rows.forEach(r => {
+    const k = r['コートネーム']; if(!k) return;
+    if(!m[k]) m[k]={name:k,no:r['#'],min:0,pts:0,fgm:0,fga:0,p3m:0,p3a:0,ftm:0,fta:0,or:0,dr:0,ast:0,to:0,stl:0,blk:0,pm:0,eff:0,usgArr:[],efgArr:[]};
+    const p=m[k];
+    ['min','pts','fgm','fga','or','dr','ast','to','stl','blk','eff'].forEach(f=>{p[f]+=n(r[f.toUpperCase()]||r[f]);});
+    p.p3m+=n(r['3PM']); p.p3a+=n(r['3PA']); p.ftm+=n(r['FTM']); p.fta+=n(r['FTA']);
+    p.pm+=n(r['＋/－']||r['+/-']||0);
+    const u=r['USG%'],e=r['eFG%'];
+    if(u) p.usgArr.push(n(u));
+    if(e) p.efgArr.push(n(e));
+  });
+  return Object.values(m).sort((a,b)=>b.pts-a.pts);
+}
+
+function renderGamePlayers(players) {
+  const tbody = document.getElementById('game-player-tbody');
+  if(!players.length){tbody.innerHTML='<tr><td colspan="17" class="empty-state">この試合の選手データが見つかりません</td></tr>';return;}
+  const maxP = Math.max(...players.map(p=>p.pts));
+  tbody.innerHTML = players.map(p=>{
+    const fgp = p.fga>0?(p.fgm/p.fga*100).toFixed(1)+'%':'—';
+    const usg = p.usgArr.length?(p.usgArr.reduce((a,b)=>a+b,0)/p.usgArr.length).toFixed(1)+'%':'—';
+    const pm  = p.pm>=0?`+${p.pm}`:`${p.pm}`;
+    return `<tr class="${p.pts===maxP?'top-row':''}">
+      <td class="pnum">${p.no}</td><td class="player-name">${p.name}</td>
+      <td class="num">${p.min}</td>
+      <td class="num" style="font-weight:${p.pts===maxP?700:400}">${p.pts}</td>
+      <td class="num">${p.fgm}/${p.fga}</td><td class="num">${fgp}</td>
+      <td class="num">${p.p3m}/${p.p3a}</td><td class="num">${p.ftm}/${p.fta}</td>
+      <td class="num">${p.or}</td><td class="num">${p.dr}</td>
+      <td class="num">${p.ast}</td><td class="num">${p.to}</td>
+      <td class="num">${p.stl}</td><td class="num">${p.blk}</td>
+      <td class="num ${p.pm>=0?'pm-pos':'pm-neg'}">${pm}</td>
+      <td class="num">${p.eff}</td><td class="num">${usg}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ========================================
+   選手個人
+   ======================================== */
+function updatePlayer() {
+  const name = document.getElementById('sel-player').value;
+  const cat  = document.getElementById('sel-player-cat').value;
+  let rows = D.player.filter(r=>r['コートネーム']===name);
+  if(cat) rows=rows.filter(r=>r['Category']===cat);
+  if(!rows.length) return;
+
+  // 試合別集計
+  const byGame = {};
+  rows.forEach(r=>{ const gid=r['GameID']; if(!byGame[gid]) byGame[gid]={gid,rows:[]}; byGame[gid].rows.push(r); });
+  const gameStats = Object.values(byGame).sort((a,b)=>(b.gid||'').localeCompare(a.gid||'')).map(g=>{
+    const p = mergeByName(g.rows)[0]||{};
+    const gInfo = D.game.find(dg=>dg['GameID']===g.gid)||{};
+    return {...p, gid:g.gid, date:gInfo['DATE']||'', opponent:gInfo['対戦相手']||'', result:(col(gInfo,'勝敗')||'').toUpperCase()};
+  });
+
+  // サマリー
+  const allNames = [...new Set(D.player.map(r=>r['コートネーム']).filter(Boolean))];
+  const teamAvg  = allNames.map(nm=>avg(D.player.filter(r=>r['コートネーム']===nm),'PTS')).reduce((a,b)=>a+b,0)/allNames.length;
+  const myAvgPts = gameStats.reduce((a,g)=>a+g.pts,0)/gameStats.length;
+
+  document.getElementById('p-pts').textContent     = myAvgPts.toFixed(1);
+  document.getElementById('p-pts-sub').textContent = `チーム avg ${teamAvg.toFixed(1)}`;
+  document.getElementById('p-efg').textContent     = f(avg(rows,'eFG%'));
+  document.getElementById('p-ftp').textContent     = f(avg(rows,'FT%'));
+  document.getElementById('p-usg').textContent     = f(avg(rows,'USG%'));
+  document.getElementById('p-eff').textContent     = f(avg(rows,'EFF'));
+  // PPPは列名が長いのでcolで検索
+  const pppKey = Object.keys(rows[0]||{}).find(k=>k.includes('PPP'))||'PPP';
+  document.getElementById('p-ppp').textContent = f(avg(rows,pppKey),2);
+  const pmAvg = gameStats.reduce((a,g)=>a+g.pm,0)/gameStats.length;
+  const pmEl  = document.getElementById('p-pm');
+  pmEl.textContent = (pmAvg>=0?'+':'')+pmAvg.toFixed(1);
+  pmEl.className   = 'stat-val '+(pmAvg>=0?'pm-pos':'pm-neg');
+
+  renderPlayerBars(name, rows);
+  renderPlayerGames(gameStats);
+  updatePlayerChart(gameStats);
+}
+
+function renderPlayerBars(name, myRows) {
+  const allNames = [...new Set(D.player.map(r=>r['コートネーム']).filter(Boolean))];
+  const metrics = [{label:'得点',key:'PTS'},{label:'アシスト',key:'AST'},{label:'リバウンド',key:'DR'},{label:'USG%',key:'USG%'},{label:'EFF',key:'EFF'}];
+  const colors  = ['#4f8ef7','#7f77dd','#38d9a9','#f7a84f','#4f8ef7'];
+  document.getElementById('player-bars').innerHTML = metrics.map((m,ci)=>{
+    const allAvg = allNames.map(nm=>({name:nm,val:avg(D.player.filter(r=>r['コートネーム']===nm),m.key)})).sort((a,b)=>b.val-a.val);
+    const myVal  = avg(myRows,m.key);
+    const maxVal = allAvg[0]?.val||1;
+    const pct    = Math.min(100,Math.round(myVal/maxVal*100));
+    const rank   = allAvg.findIndex(p=>p.name===name)+1;
+    return `<div class="bar-row"><span class="bar-name">${m.label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[ci]};"></div></div>
+      <span class="bar-val">${myVal.toFixed(1)}</span><span class="bar-rank">${rank}位</span></div>`;
+  }).join('');
+}
+
+function renderPlayerGames(gameStats) {
+  const tbody = document.getElementById('player-game-tbody');
+  if(!gameStats.length){tbody.innerHTML='<tr><td colspan="15" class="empty-state">データがありません</td></tr>';return;}
+  tbody.innerHTML = gameStats.map(g=>{
+    const res = g.result;
+    const resCls = res==='WIN'?'badge-win':res==='LOSE'?'badge-lose':'badge-draw';
+    const pm = g.pm>=0?`+${g.pm}`:`${g.pm}`;
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:12px;">${g.date}</td>
+      <td>${g.opponent}</td>
+      <td><span class="badge ${resCls}" style="font-size:10px;padding:2px 8px;">${res||'—'}</span></td>
+      <td class="num">${g.min}</td><td class="num" style="font-weight:500;">${g.pts}</td>
+      <td class="num">${g.fgm}/${g.fga}</td><td class="num">${g.p3m}/${g.p3a}</td>
+      <td class="num">${g.ftm}/${g.fta}</td><td class="num">${g.or}</td><td class="num">${g.dr}</td>
+      <td class="num">${g.ast}</td><td class="num">${g.to}</td><td class="num">${g.stl}</td>
+      <td class="num">${g.eff}</td>
+      <td class="num ${g.pm>=0?'pm-pos':'pm-neg'}">${pm}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updatePlayerChart(gameStats) {
+  const labels = gameStats.map(g=>g.gid);
+  const data   = gameStats.map(g=>g.pts);
+  const opts = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a8099',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#7a8099',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}};
+  if(!chartP){
+    chartP = new Chart(document.getElementById('playerChart').getContext('2d'),{type:'line',data:{labels,datasets:[{label:'得点',data,borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#4f8ef7',tension:.35,fill:true}]},options:opts});
+  } else { chartP.data.labels=labels; chartP.data.datasets[0].data=data; chartP.update(); }
+}
+
+/* ========================================
+   ラインアップ
+   ======================================== */
+function updateLineup() {
+  const idx    = parseInt(document.getElementById('sel-lineup-game').value||0);
+  const g      = D.game[idx]; if(!g) return;
+  const period = document.getElementById('sel-lineup-period').value;
+  let rows = D.lineup.filter(r=>r['GameID']===g['GameID']);
+  if(period) rows=rows.filter(r=>String(r['Period'])===period);
+  rows = rows.sort((a,b)=>n(b['Diff'])-n(a['Diff']));
+  const container = document.getElementById('lineup-list');
+  if(!rows.length){container.innerHTML='<div class="empty-state">この条件のデータがありません</div>';return;}
+  container.innerHTML = rows.map(r=>{
+    const names=['P1_Name','P2_Name','P3_Name','P4_Name','P5_Name'].map(k=>r[k]).filter(Boolean);
+    const diff=n(r['Diff']);
+    const sign=diff>0?'+':diff<0?'':'';
+    const cls=diff>0?'diff-pos':diff<0?'diff-neg':'diff-zero';
+    return `<div class="lineup-card">
+      <div class="lineup-players">${names.map(nm=>`<span class="player-chip">${nm}</span>`).join('')}</div>
+      <div class="lineup-stats">
+        <span class="lineup-stat-item">出場 <b>${Math.round(n(r['Duration']))}分</b></span>
+        <span class="lineup-stat-item">スコア <b>${r['Score_Us_Start']}-${r['Score_Us_End']} / ${r['Score_Opp_Start']}-${r['Score_Opp_End']}</b></span>
+        <span class="lineup-stat-item">ピリオド <b>${r['Period']}</b></span>
+        <span class="diff-badge ${cls}">得失点差 ${sign}${diff}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ========================================
+   チーム全体
+   ======================================== */
+function updateTeam() {
+  const cat = document.getElementById('sel-team-cat')?.value||'';
+  let games = D.game;
+  if(cat) games=games.filter(g=>g['Category']===cat);
+  if(!games.length) return;
+
+  const wins  = games.filter(g=>(g['勝敗\n(WIN / LOSE / DRAW)']||'').toUpperCase()==='WIN').length;
+  const loses = games.filter(g=>(g['勝敗\n(WIN / LOSE / DRAW)']||'').toUpperCase()==='LOSE').length;
+  const draws = games.length-wins-loses;
+  document.getElementById('t-record').textContent  = draws>0?`${wins}-${loses}-${draws}`:`${wins}-${loses}`;
+  document.getElementById('t-winrate').textContent = `勝率 ${(wins/games.length*100).toFixed(1)}%`;
+
+  const getPts = g => n(g['Team_\nPTS']);
+  const getOpp = g => n(g['Opp_\nPTS']);
+  const aPts = games.reduce((a,g)=>a+getPts(g),0)/games.length;
+  const aOpp = games.reduce((a,g)=>a+getOpp(g),0)/games.length;
+  document.getElementById('t-pts').textContent     = aPts.toFixed(1);
+  document.getElementById('t-opp-pts').textContent = `失点 avg ${aOpp.toFixed(1)}`;
+
+  const colAvg = (key) => games.reduce((a,g)=>a+n(g[key]),0)/games.length;
+  document.getElementById('t-fgp').textContent     = colAvg('Team\n_FG%').toFixed(1);
+  document.getElementById('t-opp-fgp').textContent = `相手 avg ${colAvg('Opp_\nFG%').toFixed(1)}%`;
+  document.getElementById('t-to').textContent      = colAvg('Team\n_TO').toFixed(1);
+  document.getElementById('t-opp-to').textContent  = `相手 avg ${colAvg('Opp\n_TO').toFixed(1)}`;
+  document.getElementById('t-orp').textContent     = colAvg('Team\n_OR%').toFixed(1);
+  document.getElementById('t-opp-orp').textContent = `相手 avg ${colAvg('Opp_\nOR%').toFixed(1)}%`;
+  document.getElementById('t-ppp').textContent     = colAvg('Team\n_PPP').toFixed(2);
+  document.getElementById('t-opp-ppp').textContent = `相手 avg ${colAvg('Opp_\nPPP').toFixed(2)}`;
+
+  renderTeamRank(cat);
+  updateTeamChart(games, g=>n(g['Team_\nPTS']), g=>n(g['Opp_\nPTS']));
+}
+
+function avgColHelper(games, ...parts) {
+  return games.reduce((a,g)=>a+n(col(g,...parts)),0)/games.length;
+}
+
+function renderTeamRank(cat) {
+  const allNames = [...new Set(D.player.map(r=>r['コートネーム']).filter(Boolean))];
+  const stats = allNames.map(name=>{
+    let rows = D.player.filter(r=>r['コートネーム']===name);
+    if(cat) rows=rows.filter(r=>r['Category']===cat);
+    if(!rows.length) return null;
+    const gids = [...new Set(rows.map(r=>r['GameID']))];
+    const pppKey = Object.keys(rows[0]).find(k=>k.includes('PPP'))||'PPP';
+    return { name, no:rows[0]['#'], games:gids.length,
+      pts:avg(rows,'PTS'), fgp:avg(rows,'FGA')>0?avg(rows,'FGM')/avg(rows,'FGA')*100:0,
+      efg:avg(rows,'eFG%'), ftp:avg(rows,'FT%'), usg:avg(rows,'USG%'), eff:avg(rows,'EFF'),
+      ppp:avg(rows,pppKey),
+      pm:rows.reduce((a,r)=>a+n(r['＋/－']||r['+/-']||0),0)/gids.length };
+  }).filter(Boolean).sort((a,b)=>b.pts-a.pts);
+
+  document.getElementById('team-rank-tbody').innerHTML = stats.map((p,i)=>{
+    const pm=p.pm>=0?`+${p.pm.toFixed(1)}`:`${p.pm.toFixed(1)}`;
+    return `<tr class="${i===0?'top-row':''}">
+      <td class="pnum" style="font-weight:700;">${i+1}</td>
+      <td><span class="pnum">#${p.no}</span> <span class="player-name">${p.name}</span></td>
+      <td class="num">${p.games}</td>
+      <td class="num" style="font-weight:${i===0?700:400}">${p.pts.toFixed(1)}</td>
+      <td class="num">${p.fgp.toFixed(1)}%</td><td class="num">${p.efg.toFixed(1)}%</td>
+      <td class="num">${p.ftp.toFixed(1)}%</td><td class="num">${p.usg.toFixed(1)}%</td>
+      <td class="num">${p.eff.toFixed(1)}</td><td class="num">${p.ppp.toFixed(2)}</td>
+      <td class="num ${p.pm>=0?'pm-pos':'pm-neg'}">${pm}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updateTeamChart(games, getPts, getOpp) {
+  const labels = games.map(g=>g['GameID']);
+  const tPts = games.map(getPts), oPts = games.map(getOpp);
+  const opts = {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7a8099',font:{size:12},boxWidth:12}}},scales:{x:{ticks:{color:'#7a8099',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#7a8099',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}};
+  if(!chartT){
+    chartT = new Chart(document.getElementById('teamChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'チーム得点',data:tPts,backgroundColor:'rgba(79,142,247,.7)',borderRadius:4},{label:'失点',data:oPts,backgroundColor:'rgba(240,111,111,.5)',borderRadius:4}]},options:opts});
+  } else { chartT.data.labels=labels; chartT.data.datasets[0].data=tPts; chartT.data.datasets[1].data=oPts; chartT.update(); }
+}
+
+/* ========================================
+   ナビゲーション
+   ======================================== */
+function navigate(page, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  btn.classList.add('active');
+  if(page==='player') updatePlayer();
+  if(page==='lineup') updateLineup();
+  if(page==='team')   updateTeam();
+}
+
+init();
+</script>
+</body>
+</html>
