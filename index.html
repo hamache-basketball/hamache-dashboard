@@ -101,9 +101,31 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 @media(max-width:768px){.sidebar{display:none}.main{padding:16px}}
+.pw-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200}
+.pw-overlay.hidden{display:none}
+.pw-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:40px 36px;width:320px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.pw-logo{font-size:22px;font-weight:700;color:var(--accent3);font-family:var(--mono);letter-spacing:.1em}
+.pw-sub{font-size:12px;color:var(--muted);margin-top:-12px}
+.pw-input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:10px 14px;font-size:15px;font-family:var(--sans);outline:none;text-align:center;letter-spacing:.12em}
+.pw-input:focus{border-color:var(--accent)}
+.pw-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;font-family:var(--sans);cursor:pointer;transition:opacity .15s}
+.pw-btn:hover{opacity:.85}
+.pw-err{font-size:12px;color:var(--lose);font-family:var(--mono);display:none}
+.pw-err.show{display:block}
 </style>
 </head>
 <body>
+
+<!-- パスワード画面 -->
+<div class="pw-overlay" id="pw-overlay">
+  <div class="pw-box">
+    <div class="pw-logo">HAMACHE</div>
+    <div class="pw-sub">2026シーズン / コーチ専用</div>
+    <input class="pw-input" id="pw-input" type="password" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">ログイン</button>
+    <div class="pw-err" id="pw-err">パスワードが違います</div>
+  </div>
+</div>
 
 <div class="loading-overlay" id="loading">
   <div class="loading-spinner"></div>
@@ -614,7 +636,27 @@ function navigate(page, btn) {
   if(page==='team')   updateTeam();
 }
 
-init();
+/* ========================================
+   パスワード認証
+   ======================================== */
+const PW = 'hamadayama';
+function checkPw() {
+  const val = document.getElementById('pw-input').value;
+  if(val === PW) {
+    document.getElementById('pw-overlay').classList.add('hidden');
+    sessionStorage.setItem('auth','1');
+    init();
+  } else {
+    document.getElementById('pw-err').classList.add('show');
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+// 同セッション内は再入力不要
+if(sessionStorage.getItem('auth')==='1'){
+  document.getElementById('pw-overlay').classList.add('hidden');
+  init();
+}
 </script>
 </body>
 </html>
