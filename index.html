@@ -77,6 +77,10 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 .pnum{color:var(--muted);font-family:var(--mono);font-size:12px}
 .pm-pos{color:var(--win);font-family:var(--mono)}
 .pm-neg{color:var(--lose);font-family:var(--mono)}
+.fp-val{color:var(--accent3);font-family:var(--mono);font-weight:500}
+.fp-desc{font-size:11px;color:var(--muted);background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent3);border-radius:var(--radius);padding:12px 16px;margin-bottom:12px;line-height:1.7}
+.fp-desc-title{color:var(--accent3);font-weight:500;display:block;margin-bottom:4px}
+.fp-desc-br{display:block;margin-top:6px}
 .bar-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
 .bar-row{display:flex;align-items:center;gap:12px}
 .bar-name{font-size:13px;color:var(--text);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis}
@@ -209,9 +213,15 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">FTR</div><div class="stat-val" id="g-ftr">—</div><div class="stat-sub">相手 <span id="g-opp-ftr">—</span></div></div>
   </div>
   <div class="section-head">選手スタッツ（この試合・全ピリオド合算）</div>
+  <div class="fp-desc">
+    <span class="fp-desc-title">■ FP（ファンタジー・ポイント）とは？</span>
+    得点だけでなく、リバウンド、アシスト、ディフェンスなど「試合中のあらゆる貢献」をひとつの数字にまとめた総合評価スコアです。（NBA公式採用指標）
+    <span class="fp-desc-br"></span>
+    【特徴】 得点（1点）よりも、アシスト（1.5点）やリバウンド（1.2点）、さらにはスティール・ブロック（3点）といった「味方を活かすプレー」や「体を張った守備」が高く評価される仕組みになっています。点数を多く取った選手だけでなく、泥臭くチームを支える「縁の下の力持ち（本当のMVP）」が誰なのかが一目で分かる、ハマーチェが大切にする「見えないエナジー」を証明する指標です。
+  </div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>#</th><th>選手名</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>FG%</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>BLK</th><th>+/−</th><th>EFF</th><th>USG%</th></tr></thead>
+      <thead><tr><th>#</th><th>選手名</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>FG%</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>BLK</th><th>FP</th><th>+/−</th><th>EFF</th><th>USG%</th></tr></thead>
       <tbody id="game-player-tbody"><tr><td colspan="17" class="empty-state">読み込み中...</td></tr></tbody>
     </table>
   </div>
@@ -241,8 +251,8 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   <div class="section-head">試合別詳細</div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>日付</th><th>対戦相手</th><th>結果</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>EFF</th><th>+/−</th></tr></thead>
-      <tbody id="player-game-tbody"><tr><td colspan="15" class="empty-state">選手を選択してください</td></tr></tbody>
+      <thead><tr><th>日付</th><th>対戦相手</th><th>結果</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>EFF</th><th>FP</th><th>+/−</th></tr></thead>
+      <tbody id="player-game-tbody"><tr><td colspan="16" class="empty-state">選手を選択してください</td></tr></tbody>
     </table>
   </div>
 </div>
@@ -320,6 +330,9 @@ async function fetchSheet(name) {
 const n = v => { const x=parseFloat(v); return isNaN(x)?0:x; };
 const f = (v,d=1) => { const x=parseFloat(v); return isNaN(x)?'—':x.toFixed(d); };
 const avg = (arr,k) => { const v=arr.map(r=>n(r[k])).filter(x=>x||x===0); return v.length?v.reduce((a,b)=>a+b,0)/v.length:0; };
+// FP計算（NBA公式）: PTS×1.0 + REB×1.2 + AST×1.5 + STL×3.0 + BLK×3.0 - TO×1.0
+const calcFP = (pts,or,dr,ast,stl,blk,to) =>
+  n(pts)*1.0 + (n(or)+n(dr))*1.2 + n(ast)*1.5 + n(stl)*3.0 + n(blk)*3.0 - n(to)*1.0;
 // スプレッドシートの改行入り列名をフラット化して検索
 function col(obj, ...parts) {
   for (const k of Object.keys(obj)) {
@@ -449,6 +462,7 @@ function renderGamePlayers(players) {
       <td class="num">${p.or}</td><td class="num">${p.dr}</td>
       <td class="num">${p.ast}</td><td class="num">${p.to}</td>
       <td class="num">${p.stl}</td><td class="num">${p.blk}</td>
+      <td class="num fp-val">${calcFP(p.pts,p.or,p.dr,p.ast,p.stl,p.blk,p.to).toFixed(1)}</td>
       <td class="num ${p.pm>=0?'pm-pos':'pm-neg'}">${pm}</td>
       <td class="num">${p.eff}</td><td class="num">${usg}</td>
     </tr>`;
@@ -535,6 +549,7 @@ function renderPlayerGames(gameStats) {
       <td class="num">${g.ftm}/${g.fta}</td><td class="num">${g.or}</td><td class="num">${g.dr}</td>
       <td class="num">${g.ast}</td><td class="num">${g.to}</td><td class="num">${g.stl}</td>
       <td class="num">${g.eff}</td>
+      <td class="num fp-val">${calcFP(g.pts,g.or,g.dr,g.ast,g.stl,g.blk,g.to).toFixed(1)}</td>
       <td class="num ${g.pm>=0?'pm-pos':'pm-neg'}">${pm}</td>
     </tr>`;
   }).join('');
