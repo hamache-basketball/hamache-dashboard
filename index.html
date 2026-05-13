@@ -81,6 +81,11 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 .fp-desc{font-size:11px;color:var(--muted);background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent3);border-radius:var(--radius);padding:12px 16px;margin-bottom:12px;line-height:1.7}
 .fp-desc-title{color:var(--accent3);font-weight:500;display:block;margin-bottom:4px}
 .fp-desc-br{display:block;margin-top:6px}
+.stat-note{font-size:11px;color:var(--muted);margin-bottom:10px;padding:6px 12px;background:var(--bg2);border-radius:6px;border:1px solid var(--border)}
+.term-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:20px}
+.term-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--term-color,var(--accent));border-radius:var(--radius);padding:14px 16px}
+.term-title{font-size:12px;font-weight:600;color:var(--term-color,var(--accent));margin-bottom:8px}
+.term-body{font-size:11px;color:var(--muted);line-height:1.75}
 .bar-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
 .bar-row{display:flex;align-items:center;gap:12px}
 .bar-name{font-size:13px;color:var(--text);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis}
@@ -213,17 +218,32 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-label">FTR</div><div class="stat-val" id="g-ftr">—</div><div class="stat-sub">相手 <span id="g-opp-ftr">—</span></div></div>
   </div>
   <div class="section-head">選手スタッツ（この試合・全ピリオド合算）</div>
-  <div class="fp-desc">
-    <span class="fp-desc-title">■ FP（ファンタジー・ポイント）とは？</span>
-    得点だけでなく、リバウンド、アシスト、ディフェンスなど「試合中のあらゆる貢献」をひとつの数字にまとめた総合評価スコアです。（NBA公式採用指標）
-    <span class="fp-desc-br"></span>
-    【特徴】 得点（1点）よりも、アシスト（1.5点）やリバウンド（1.2点）、さらにはスティール・ブロック（3点）といった「味方を活かすプレー」や「体を張った守備」が高く評価される仕組みになっています。点数を多く取った選手だけでなく、泥臭くチームを支える「縁の下の力持ち（本当のMVP）」が誰なのかが一目で分かる、「見えないエナジー（貢献の量）」を証明する指標です。
-  </div>
+  <div class="stat-note">※ +/- , FP , EFF , USG% の用語解説はページ下部をご覧ください。</div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>#</th><th>選手名</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>FG%</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>BLK</th><th>FP</th><th>+/−</th><th>EFF</th><th>USG%</th></tr></thead>
-      <tbody id="game-player-tbody"><tr><td colspan="17" class="empty-state">読み込み中...</td></tr></tbody>
+      <thead><tr><th>#</th><th>選手名</th><th>MIN</th><th>PTS</th><th>FGM/A</th><th>FG%</th><th>3PM/A</th><th>FTM/A</th><th>OR</th><th>DR</th><th>AST</th><th>TO</th><th>STL</th><th>BLK</th><th>+/−</th><th>FP</th><th>EFF</th><th>USG%</th></tr></thead>
+      <tbody id="game-player-tbody"><tr><td colspan="18" class="empty-state">読み込み中...</td></tr></tbody>
     </table>
+  </div>
+
+  <!-- 用語解説 -->
+  <div class="term-grid">
+    <div class="term-card" style="--term-color:#7a8099">
+      <div class="term-title">■ +/−（プラスマイナス）とは？</div>
+      <div class="term-body">その選手がコートに立っている間に、「チーム全体のスコアがどれだけ動いたか」を表す指標です。<br><br>【特徴】 個人の得点やミスといった目に見える数字だけでなく、必死のディフェンスや味方のためのスペース作りなど、「記録に残らないすべての貢献」を合わせたチームへの影響力が分かります。<br>たとえ本人の得点が少なくても、この数字が高い選手は、「その子がコートにいると、なぜかチームが良い流れになる」という勝利を引き寄せる力を持っていることを示しています。</div>
+    </div>
+    <div class="term-card" style="--term-color:var(--accent3)">
+      <div class="term-title">■ FP（ファンタジー・ポイント）とは？</div>
+      <div class="term-body">得点だけでなく、リバウンド、アシスト、ディフェンスなど「試合中のあらゆる貢献」をひとつの数字にまとめた総合評価スコアです。（NBA公式採用指標）<br><br>【特徴】 得点（1点）よりも、アシスト（1.5点）やリバウンド（1.2点）、さらにはスティール・ブロック（3点）といった「味方を活かすプレー」や「体を張った守備」が高く評価される仕組みになっています。点数を多く取った選手だけでなく、泥臭くチームを支える「縁の下の力持ち（本当のMVP）」が誰なのかが一目で分かる、ハマーチェが大切にする「見えないエナジー」を証明する指標です。</div>
+    </div>
+    <div class="term-card" style="--term-color:var(--accent)">
+      <div class="term-title">■ EFF（エフィシエンシー／効率性）とは？</div>
+      <div class="term-body">得点やリバウンドなどの「良いプレー」の合計から、シュートミスやターンオーバーといった「マイナスのプレー」を差し引いて計算する、「プレーの質と正確性」を表す指標です。<br><br>【特徴】 FPが「貢献の量」を評価するのに対し、EFFは「無駄のなさ」を評価します。無理なシュートを打たず、ミスを少なく抑えて着実に貢献する「チームに安定感をもたらす、賢く堅実な選手」の数字が高くなります。</div>
+    </div>
+    <div class="term-card" style="--term-color:var(--accent2)">
+      <div class="term-title">■ USG%（ユーセージ%／攻撃占有率）とは？</div>
+      <div class="term-body">コートに立っている間、「チームの攻撃の何%をその選手が引き受けたか（シュート、フリースロー、ミスでプレーを終えた割合）」を表す指標です。<br><br>【特徴】 この数字が高いほど、ボールを託される「オフェンスの中心選手」であることを意味します。能力の良し悪しではなく、「その選手がどれだけ攻撃の責任を背負って戦っているか」という、チーム内での役割の大きさが一目で分かります。</div>
+    </div>
   </div>
 </div>
 
@@ -462,8 +482,8 @@ function renderGamePlayers(players) {
       <td class="num">${p.or}</td><td class="num">${p.dr}</td>
       <td class="num">${p.ast}</td><td class="num">${p.to}</td>
       <td class="num">${p.stl}</td><td class="num">${p.blk}</td>
-      <td class="num fp-val">${calcFP(p.pts,p.or,p.dr,p.ast,p.stl,p.blk,p.to).toFixed(1)}</td>
       <td class="num ${p.pm>=0?'pm-pos':'pm-neg'}">${pm}</td>
+      <td class="num fp-val">${calcFP(p.pts,p.or,p.dr,p.ast,p.stl,p.blk,p.to).toFixed(1)}</td>
       <td class="num">${p.eff}</td><td class="num">${usg}</td>
     </tr>`;
   }).join('');
