@@ -85,6 +85,48 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 .fp-desc-title{color:var(--accent3);font-weight:500;display:block;margin-bottom:4px}
 .fp-desc-br{display:block;margin-top:6px}
 .stat-note{font-size:11px;color:var(--muted);margin-bottom:10px;padding:6px 12px;background:var(--bg2);border-radius:6px;border:1px solid var(--border)}
+/* Report page styles */
+.rpt-banner{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.rpt-banner-left{display:flex;flex-direction:column;gap:6px}
+.rpt-score-wrap{display:flex;align-items:baseline;gap:12px}
+.rpt-score-us{font-size:44px;font-weight:700;font-family:var(--mono);color:var(--accent)}
+.rpt-score-opp{font-size:44px;font-weight:700;font-family:var(--mono);color:var(--muted)}
+.rpt-score-sep{font-size:24px;color:var(--border2);font-family:var(--mono)}
+.rpt-meta{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.rpt-kpi-row{display:flex;gap:24px;margin-left:auto;flex-wrap:wrap}
+.rpt-kpi{text-align:center}
+.rpt-kpi-val{font-size:22px;font-weight:700;font-family:var(--mono);color:var(--text)}
+.rpt-kpi-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.rpt-section-head{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;margin-top:4px;display:flex;align-items:center;gap:8px}
+.rpt-section-head::after{content:'';flex:1;height:1px;background:var(--border)}
+.rpt-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:0}
+.rpt-card-title{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.rpt-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.rpt-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.rpt-factors{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.rpt-factor-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.rpt-factor-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.rpt-factor-val{font-size:26px;font-weight:700;font-family:var(--mono)}
+.rpt-factor-bar{height:6px;border-radius:3px;background:var(--bg3);margin:6px 0 4px;overflow:hidden;display:flex}
+.rpt-factor-opp{font-size:11px;color:var(--muted)}
+.rpt-period-bars{display:flex;gap:10px;align-items:flex-end;height:100px;padding:0 4px}
+.rpt-pb-group{display:flex;flex-direction:column;align-items:center;flex:1;gap:2px}
+.rpt-pb-bars{display:flex;gap:3px;align-items:flex-end;height:80px}
+.rpt-pb-bar{width:16px;border-radius:2px 2px 0 0}
+.rpt-pb-lbl{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.rpt-pb-score{font-size:10px;font-family:var(--mono)}
+.rpt-legend{display:flex;gap:12px;font-size:10px;color:var(--muted);margin-top:8px}
+.rpt-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.rpt-bc-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
+.rpt-bc-lbl{width:90px;color:var(--muted);text-align:right;flex-shrink:0;font-size:10px}
+.rpt-bc-track{flex:1;height:10px;border-radius:5px;overflow:hidden;display:flex}
+.rpt-bc-val{width:32px;font-family:var(--mono);font-size:11px;color:var(--text);text-align:right}
+.rpt-fp-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rpt-fp-name{width:56px;font-size:12px;color:var(--text);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpt-fp-track{flex:1;height:12px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.rpt-fp-fill{height:100%;border-radius:3px;background:var(--accent3)}
+.rpt-fp-val{width:32px;font-size:12px;font-family:var(--mono);color:var(--accent3);text-align:right}
+@media(max-width:768px){.rpt-grid2,.rpt-grid3,.rpt-factors{grid-template-columns:1fr}}
 .term-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:20px}
 .term-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--term-color,var(--accent));border-radius:var(--radius);padding:14px 16px}
 .term-title{font-size:12px;font-weight:600;color:var(--term-color,var(--accent));margin-bottom:8px}
@@ -170,6 +212,9 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     <button class="mobile-nav-item" onclick="navigate('team',this)">
       <span class="mobile-nav-icon">📊</span>チーム全体
     </button>
+    <button class="mobile-nav-item" onclick="navigate('report',this)">
+      <span class="mobile-nav-icon">📋</span>試合レポート
+    </button>
   </div>
 </nav>
 
@@ -185,6 +230,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     <button class="nav-item" onclick="navigate('player',this)"><span class="nav-icon">👤</span>選手個人</button>
     <button class="nav-item" onclick="navigate('lineup',this)"><span class="nav-icon">👥</span>ラインアップ</button>
     <button class="nav-item" onclick="navigate('team',this)"><span class="nav-icon">📊</span>チーム全体</button>
+    <button class="nav-item" onclick="navigate('report',this)"><span class="nav-icon">📋</span>試合レポート</button>
   </div>
 </nav>
 
@@ -237,7 +283,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     </div>
     <div class="term-card" style="--term-color:var(--accent3)">
       <div class="term-title">■ FP（ファンタジー・ポイント）とは？</div>
-      <div class="term-body">得点だけでなく、リバウンド、アシスト、ディフェンスなど「試合中のあらゆる貢献」をひとつの数字にまとめた総合評価スコアです。（NBA公式採用指標）<br><br>【特徴】 得点（1点）よりも、アシスト（1.5点）やリバウンド（1.2点）、さらにはスティール・ブロック（3点）といった「味方を活かすプレー」や「体を張った守備」が高く評価される仕組みになっています。点数を多く取った選手だけでなく、泥臭くチームを支える「縁の下の力持ち（本当のMVP）」が誰なのかが一目で分かる、「見えないエナジー（貢献の量）」を証明する指標です。</div>
+      <div class="term-body">得点だけでなく、リバウンド、アシスト、ディフェンスなど「試合中のあらゆる貢献」をひとつの数字にまとめた総合評価スコアです。（NBA公式採用指標）<br><br>【特徴】 得点（1点）よりも、アシスト（1.5点）やリバウンド（1.2点）、さらにはスティール・ブロック（3点）といった「味方を活かすプレー」や「体を張った守備」が高く評価される仕組みになっています。点数を多く取った選手だけでなく、泥臭くチームを支える「縁の下の力持ち（本当のMVP）」が誰なのかが一目で分かる、ハマーチェが大切にする「見えないエナジー」を証明する指標です。</div>
     </div>
     <div class="term-card" style="--term-color:var(--accent)">
       <div class="term-title">■ EFF（エフィシエンシー／効率性）とは？</div>
@@ -323,6 +369,93 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   <div class="chart-wrap"><canvas id="teamChart" height="140"></canvas></div>
 </div>
 
+<!-- 試合レポート -->
+<div id="page-report" class="page">
+  <div class="page-header"><div class="page-title">試合レポート</div><div class="page-sub">試合の流れと貢献度をビジュアルで確認</div></div>
+  <div class="filter-bar">
+    <span class="filter-label">試合</span>
+    <select id="sel-report-game" onchange="updateReport()"></select>
+  </div>
+
+  <!-- スコアバナー -->
+  <div class="rpt-banner" id="rpt-banner">
+    <div class="rpt-banner-left">
+      <div class="rpt-score-wrap">
+        <span class="rpt-score-us" id="rpt-us">—</span>
+        <span class="rpt-score-sep">—</span>
+        <span class="rpt-score-opp" id="rpt-opp">—</span>
+        <span class="badge" id="rpt-badge">—</span>
+      </div>
+      <div class="rpt-meta" id="rpt-meta">—</div>
+    </div>
+    <div class="rpt-kpi-row">
+      <div class="rpt-kpi"><div class="rpt-kpi-val" id="rpt-pace">—</div><div class="rpt-kpi-lbl">PACE</div></div>
+      <div class="rpt-kpi"><div class="rpt-kpi-val" style="color:var(--accent)" id="rpt-ppp">—</div><div class="rpt-kpi-lbl">Team PPP</div></div>
+      <div class="rpt-kpi"><div class="rpt-kpi-val" style="color:var(--muted)" id="rpt-opp-ppp">—</div><div class="rpt-kpi-lbl">Opp PPP</div></div>
+    </div>
+  </div>
+
+  <!-- ① 4 Factors -->
+  <div class="rpt-section-head">① 4 Factors — 勝敗を分けた4指標</div>
+  <div class="rpt-factors" id="rpt-factors"></div>
+
+  <!-- ② ピリオド別 + モメンタム -->
+  <div class="rpt-section-head">② ピリオド別スコア & 得失点差の流れ</div>
+  <div class="rpt-grid2">
+    <div class="rpt-card">
+      <div class="rpt-card-title">ピリオド別得点</div>
+      <div id="rpt-period-bars" class="rpt-period-bars"></div>
+      <div class="rpt-legend"><span><span class="rpt-dot" style="background:var(--accent)"></span>浜っ子</span><span><span class="rpt-dot" style="background:var(--lose)"></span>相手</span></div>
+    </div>
+    <div class="rpt-card">
+      <div class="rpt-card-title">累積得失点差（モメンタム）</div>
+      <canvas id="rpt-momentum-chart" height="100"></canvas>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">最終得失点差 <span id="rpt-final-diff" style="color:var(--accent2);font-weight:700;font-family:var(--mono)">—</span></div>
+    </div>
+  </div>
+
+  <!-- ③ Board Control + FPランキング + 貢献度マップ -->
+  <div class="rpt-section-head">③ リバウンド支配 | FP ランキング | 貢献度マップ</div>
+  <div class="rpt-grid3">
+    <div class="rpt-card">
+      <div class="rpt-card-title">Board Control（リバウンド支配）</div>
+      <div id="rpt-board-control"></div>
+      <div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:var(--radius)">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Forced TO%（STL誘発率）</div>
+        <div><span style="font-size:22px;font-weight:700;color:var(--accent2);font-family:var(--mono)" id="rpt-forced-to">—</span><span style="font-size:11px;color:var(--muted);margin-left:6px">をSTLで誘発</span></div>
+      </div>
+      <div class="rpt-legend" style="margin-top:8px"><span><span class="rpt-dot" style="background:var(--accent)"></span>浜っ子</span><span><span class="rpt-dot" style="background:var(--lose)"></span>相手</span></div>
+    </div>
+    <div class="rpt-card">
+      <div class="rpt-card-title">FP ランキング（この試合）</div>
+      <div id="rpt-fp-rank"></div>
+    </div>
+    <div class="rpt-card">
+      <div class="rpt-card-title">貢献度マップ（FP × USG%）</div>
+      <canvas id="rpt-scatter-chart" height="160"></canvas>
+      <div style="font-size:9px;color:var(--muted);margin-top:4px">バブルの大きさ = 得点</div>
+    </div>
+  </div>
+
+  <!-- ④ ラインアップ + 4Factorsレーダー -->
+  <div class="rpt-section-head">④ ラインアップ TOP3 | 4 Factors レーダー</div>
+  <div class="rpt-grid2">
+    <div class="rpt-card">
+      <div class="rpt-card-title">ラインアップ TOP3（+/− 降順）</div>
+      <div class="table-wrap" style="margin-bottom:0">
+        <table>
+          <thead><tr><th>#</th><th>P1</th><th>P2</th><th>P3</th><th>P4</th><th>P5</th><th>MIN</th><th>+/−</th></tr></thead>
+          <tbody id="rpt-lineup-tbody"><tr><td colspan="8" class="empty-state">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="rpt-card">
+      <div class="rpt-card-title">4 Factors レーダー（vs 相手）</div>
+      <canvas id="rpt-radar-chart" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 
@@ -406,6 +539,7 @@ function buildFilters() {
   const gameOpts = gamesSorted.map(({g,i}) => `<option value="${i}">${g['GameID']} — ${g['DATE']} vs ${g['対戦相手']}</option>`).join('');
   document.getElementById('sel-game').innerHTML = gameOpts;
   document.getElementById('sel-lineup-game').innerHTML = gameOpts;
+  document.getElementById('sel-report-game').innerHTML = gameOpts;
 
   // 選手を#番号順に並べる（同名は最初の出現行の番号を使用）
   const nameNumMap = {};
@@ -716,13 +850,190 @@ function navigate(page, btn) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  // サイドバーとモバイルナビ両方をアクティブに
   document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(b=>{
     if(b.getAttribute('onclick')===btn.getAttribute('onclick')) b.classList.add('active');
   });
   if(page==='player') updatePlayer();
   if(page==='lineup') updateLineup();
   if(page==='team')   updateTeam();
+  if(page==='report') updateReport();
+}
+
+/* ========================================
+   試合レポートページ
+   ======================================== */
+let rptMomentumChart=null, rptScatterChart=null, rptRadarChart=null;
+
+function updateReport() {
+  const idx = parseInt(document.getElementById('sel-report-game').value||0);
+  const g = D.game[idx]; if(!g) return;
+
+  // バナー
+  const us  = g['Team_\nPTS']||'—';
+  const op  = g['Opp_\nPTS']||'—';
+  const res = (g['勝敗\n(WIN / LOSE / DRAW)']||'').toUpperCase();
+  document.getElementById('rpt-us').textContent  = us;
+  document.getElementById('rpt-opp').textContent = op;
+  document.getElementById('rpt-meta').textContent= `${g['GameID']} | ${g['DATE']} | vs ${g['対戦相手']}`;
+  const bd = document.getElementById('rpt-badge');
+  bd.textContent = res||'—';
+  bd.className = 'badge '+(res==='WIN'?'badge-win':res==='LOSE'?'badge-lose':'badge-draw');
+  document.getElementById('rpt-pace').textContent    = f(g['PACE']);
+  document.getElementById('rpt-ppp').textContent     = f(g['Team\n_PPP'],2);
+  document.getElementById('rpt-opp-ppp').textContent = f(g['Opp_\nPPP'],2);
+
+  // 4 Factors
+  const factors = [
+    {label:'eFG%', us:g['Team\n_FG%'], opp:g['Opp_\nFG%'], color:'#38d9a9', higherBetter:true},
+    {label:'TO%',  us:g['Team\n_TO%'], opp:g['Opp_\nTO%'], color:'#f06f6f', higherBetter:false},
+    {label:'OR%',  us:g['Team\n_OR%'], opp:g['Opp_\nOR%'], color:'#f7a84f', higherBetter:true},
+    {label:'FTR',  us:g['Team\n_FTR'], opp:g['Opp_\nFTR'], color:'#4f8ef7', higherBetter:true},
+  ];
+  document.getElementById('rpt-factors').innerHTML = factors.map(fc=>{
+    const uv=parseFloat(fc.us)||0, ov=parseFloat(fc.opp)||0;
+    const tot=uv+ov||1; const upct=Math.round(uv/tot*100);
+    const good=fc.higherBetter?uv>=ov:uv<=ov;
+    const diff=uv-ov; const sign=diff>=0?'+':'';
+    const arrow=good?'▲':'▼'; const arrowColor=good?'#38d9a9':'#f06f6f';
+    return `<div class="rpt-factor-card">
+      <div class="rpt-factor-lbl">${fc.label}</div>
+      <div class="rpt-factor-val" style="color:${fc.color}">${f(fc.us)}%</div>
+      <div class="rpt-factor-bar">
+        <div style="width:${upct}%;background:var(--accent);border-radius:3px 0 0 3px"></div>
+        <div style="width:${100-upct}%;background:var(--lose);border-radius:0 3px 3px 0"></div>
+      </div>
+      <div class="rpt-factor-opp">相手 ${f(fc.opp)}% &nbsp;<span style="color:${arrowColor}">${arrow}${sign}${Math.abs(diff).toFixed(1)}%</span></div>
+    </div>`;
+  }).join('');
+
+  // ピリオド別スコア
+  const lineupRows = D.lineup.filter(r=>r['GameID']===g['GameID']);
+  const periods = ['1Q','2Q','3Q','4Q'];
+  const periodData = periods.map(q=>{
+    const qRows=lineupRows.filter(r=>r['Period']===q);
+    if(!qRows.length) return {q,us:0,opp:0};
+    const us  = Math.max(...qRows.map(r=>n(r['Score_Us_End'])))  - Math.min(...qRows.map(r=>n(r['Score_Us_Start'])));
+    const opp = Math.max(...qRows.map(r=>n(r['Score_Opp_End']))) - Math.min(...qRows.map(r=>n(r['Score_Opp_Start'])));
+    return {q,us,opp};
+  });
+  const maxScore=Math.max(...periodData.flatMap(p=>[p.us,p.opp]),1);
+  document.getElementById('rpt-period-bars').innerHTML = periodData.map(p=>{
+    const uhp=Math.round(p.us/maxScore*76); const ohp=Math.round(p.opp/maxScore*76);
+    const diff=p.us-p.opp; const scoreColor=diff>0?'var(--accent)':diff<0?'var(--lose)':'var(--muted)';
+    return `<div class="rpt-pb-group">
+      <div class="rpt-pb-bars">
+        <div class="rpt-pb-bar" style="height:${uhp}px;background:var(--accent)"></div>
+        <div class="rpt-pb-bar" style="height:${ohp}px;background:rgba(240,111,111,0.6)"></div>
+      </div>
+      <div class="rpt-pb-lbl">${p.q}</div>
+      <div class="rpt-pb-score" style="color:${scoreColor}">${p.us}-${p.opp}</div>
+    </div>`;
+  }).join('');
+
+  // モメンタムチャート
+  const cumDiffs=[0];
+  periodData.forEach(p=>cumDiffs.push(cumDiffs[cumDiffs.length-1]+(p.us-p.opp)));
+  const finalDiff=cumDiffs[cumDiffs.length-1];
+  document.getElementById('rpt-final-diff').textContent=(finalDiff>=0?'+':'')+finalDiff;
+  document.getElementById('rpt-final-diff').style.color=finalDiff>=0?'var(--accent2)':'var(--lose)';
+  if(rptMomentumChart){rptMomentumChart.destroy();rptMomentumChart=null;}
+  rptMomentumChart=new Chart(document.getElementById('rpt-momentum-chart').getContext('2d'),{
+    type:'line',
+    data:{labels:['開始','1Q','2Q','3Q','4Q'],datasets:[{
+      label:'得失点差',data:cumDiffs,
+      borderColor:finalDiff>=0?'#38d9a9':'#f06f6f',
+      backgroundColor:finalDiff>=0?'rgba(56,217,169,0.08)':'rgba(240,111,111,0.08)',
+      borderWidth:2,pointRadius:4,tension:0.3,fill:true,
+      pointBackgroundColor:finalDiff>=0?'#38d9a9':'#f06f6f'
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#7a8099',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{ticks:{color:'#7a8099',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},
+          afterDataLimits:ax=>{const m=Math.max(Math.abs(ax.min),Math.abs(ax.max),5);ax.min=-m;ax.max=m;}}
+      }}
+  });
+
+  // Board Control
+  const playerRows=D.player.filter(r=>r['GameID']===g['GameID']);
+  const totalOR=playerRows.reduce((a,r)=>a+n(r['OR']),0);
+  const totalDR=playerRows.reduce((a,r)=>a+n(r['DR']),0);
+  const oppOR=n(g['Opp\n_OR']); const oppDR=n(g['Opp\n_DR']);
+  const defPct=totalDR+oppOR>0?Math.round(totalDR/(totalDR+oppOR)*100):0;
+  const offPct=totalOR+oppDR>0?Math.round(totalOR/(totalOR+oppDR)*100):0;
+  const totalSTL=playerRows.reduce((a,r)=>a+n(r['STL']),0);
+  const oppTO=n(g['Opp\n_TO']);
+  const forcedTO=oppTO>0?Math.round(totalSTL/oppTO*100):0;
+  document.getElementById('rpt-forced-to').textContent=forcedTO+'%';
+  document.getElementById('rpt-board-control').innerHTML=[
+    {label:'自軍ゴール下(Def)',us:defPct,opp:100-defPct},
+    {label:'相手ゴール下(Off)',us:offPct,opp:100-offPct},
+  ].map(bc=>`<div class="rpt-bc-row">
+    <span class="rpt-bc-lbl">${bc.label}</span>
+    <div class="rpt-bc-track">
+      <div style="width:${bc.us}%;background:var(--accent)"></div>
+      <div style="width:${bc.opp}%;background:var(--lose)"></div>
+    </div>
+    <span class="rpt-bc-val">${bc.us}%</span>
+  </div>`).join('');
+
+  // FPランキング
+  const merged=mergeByName(playerRows).map(p=>({...p,fp:calcFP(p.pts,p.or,p.dr,p.ast,p.stl,p.blk,p.to)})).sort((a,b)=>b.fp-a.fp);
+  const maxFP=merged[0]?.fp||1;
+  document.getElementById('rpt-fp-rank').innerHTML=merged.slice(0,8).map(p=>{
+    const pct=Math.round(p.fp/maxFP*100);
+    return `<div class="rpt-fp-row">
+      <span class="rpt-fp-name">${p.name}</span>
+      <div class="rpt-fp-track"><div class="rpt-fp-fill" style="width:${pct}%"></div></div>
+      <span class="rpt-fp-val">${p.fp.toFixed(1)}</span>
+    </div>`;
+  }).join('');
+
+  // 貢献度マップ
+  if(rptScatterChart){rptScatterChart.destroy();rptScatterChart=null;}
+  const scatData=merged.map(p=>({
+    x:p.usgArr.length?(p.usgArr.reduce((a,b)=>a+b,0)/p.usgArr.length):0,
+    y:p.fp, r:Math.max(4,Math.min(20,p.pts*0.8)), label:p.name
+  }));
+  rptScatterChart=new Chart(document.getElementById('rpt-scatter-chart').getContext('2d'),{
+    type:'bubble',
+    data:{datasets:[{label:'選手',data:scatData,backgroundColor:'rgba(79,142,247,0.25)',borderColor:'#4f8ef7',borderWidth:1.5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:d=>`${d.raw.label} FP:${d.raw.y.toFixed(1)} USG:${d.raw.x.toFixed(1)}%`}}},
+      scales:{
+        x:{title:{display:true,text:'USG%',color:'#7a8099',font:{size:10}},ticks:{color:'#7a8099',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{title:{display:true,text:'FP',color:'#7a8099',font:{size:10}},ticks:{color:'#7a8099',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true}
+      }}
+  });
+
+  // ラインアップTOP3
+  const sorted=[...lineupRows].sort((a,b)=>n(b['Diff'])-n(a['Diff'])).slice(0,3);
+  document.getElementById('rpt-lineup-tbody').innerHTML=sorted.length?sorted.map((r,i)=>{
+    const names=['P1_Name','P2_Name','P3_Name','P4_Name','P5_Name'].map(k=>r[k]||'—');
+    const diff=n(r['Diff']); const sign=diff>=0?'+':'';
+    return `<tr><td>${i+1}</td>${names.map(nm=>`<td>${nm}</td>`).join('')}
+      <td class="num">${Math.round(n(r['Duration']))}</td>
+      <td class="num ${diff>=0?'pm-pos':'pm-neg'}">${sign}${diff}</td></tr>`;
+  }).join(''):'<tr><td colspan="8" class="empty-state">データなし</td></tr>';
+
+  // 4 Factorsレーダー
+  if(rptRadarChart){rptRadarChart.destroy();rptRadarChart=null;}
+  const norm=(v,min,max)=>Math.max(0,Math.min(100,(n(v)-min)/(max-min)*100));
+  rptRadarChart=new Chart(document.getElementById('rpt-radar-chart').getContext('2d'),{
+    type:'radar',
+    data:{
+      labels:['eFG%','OR%','FTR','PACE','TO%\n(低いほど良)'],
+      datasets:[
+        {label:'浜っち',data:[norm(g['Team\n_FG%'],20,60),norm(g['Team\n_OR%'],10,60),norm(g['Team\n_FTR'],0,0.6),norm(g['PACE'],40,80),100-norm(g['Team\n_TO%'],5,40)],
+          borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,0.15)',borderWidth:2,pointRadius:3},
+        {label:'相手',data:[norm(g['Opp_\nFG%'],20,60),norm(g['Opp_\nOR%'],10,60),norm(g['Opp_\nFTR'],0,0.6),norm(g['PACE'],40,80),100-norm(g['Opp_\nTO%'],5,40)],
+          borderColor:'#f06f6f',backgroundColor:'rgba(240,111,111,0.1)',borderWidth:1.5,borderDash:[4,3],pointRadius:3},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#7a8099',font:{size:11},boxWidth:12}}},
+      scales:{r:{ticks:{display:false},grid:{color:'rgba(255,255,255,.06)'},pointLabels:{color:'#7a8099',font:{size:10}}}}}
+  });
 }
 
 /* ========================================
