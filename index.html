@@ -312,8 +312,8 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   <div class="section-head">得点ランキング（シーズン平均）</div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>順位</th><th>選手</th><th>試合数</th><th>PTS</th><th>FG%</th><th>eFG%</th><th>FT%</th><th>USG%</th><th>EFF</th><th>PPP</th><th>+/−</th></tr></thead>
-      <tbody id="team-rank-tbody"><tr><td colspan="11" class="empty-state">読み込み中...</td></tr></tbody>
+      <thead><tr><th>順位</th><th>選手</th><th>試合数</th><th>PTS</th><th>FG%</th><th>eFG%</th><th>FT%</th><th>PPP</th><th>+/−</th><th>FP</th><th>EFF</th><th>USG%</th></tr></thead>
+      <tbody id="team-rank-tbody"><tr><td colspan="12" class="empty-state">読み込み中...</td></tr></tbody>
     </table>
   </div>
   <div class="section-head">得点・失点推移（全試合）</div>
@@ -664,10 +664,19 @@ function renderTeamRank(cat) {
     // PTSは試合ごとに合算してから試合数で割る
     const totalPts = gids.reduce((sum,gid)=>sum+rows.filter(r=>r['GameID']===gid).reduce((a,r)=>a+n(r['PTS']),0),0);
     const avgPts   = gids.length>0 ? totalPts/gids.length : 0;
+    // FP：試合ごとに合算してから平均
+    const avgFP = gids.reduce((sum,gid)=>{
+      const gr = rows.filter(r=>r['GameID']===gid);
+      const pts=gr.reduce((a,r)=>a+n(r['PTS']),0), or=gr.reduce((a,r)=>a+n(r['OR']),0),
+            dr=gr.reduce((a,r)=>a+n(r['DR']),0),  ast=gr.reduce((a,r)=>a+n(r['AST']),0),
+            stl=gr.reduce((a,r)=>a+n(r['STL']),0),blk=gr.reduce((a,r)=>a+n(r['BLK']),0),
+            to=gr.reduce((a,r)=>a+n(r['TO']),0);
+      return sum + calcFP(pts,or,dr,ast,stl,blk,to);
+    },0) / (gids.length||1);
     return { name, no:rows[0]['#'], games:gids.length,
       pts:avgPts, fgp:avg(rows,'FGA')>0?avg(rows,'FGM')/avg(rows,'FGA')*100:0,
       efg:avg(rows,'eFG%'), ftp:avg(rows,'FT%'), usg:avg(rows,'USG%'), eff:avg(rows,'EFF'),
-      ppp:avg(rows,pppKey),
+      ppp:avg(rows,pppKey), fp:avgFP,
       pm:rows.reduce((a,r)=>a+n(r['＋/－']||r['+/-']||0),0)/gids.length };
   }).filter(Boolean).sort((a,b)=>b.pts-a.pts);
 
@@ -679,9 +688,10 @@ function renderTeamRank(cat) {
       <td class="num">${p.games}</td>
       <td class="num" style="font-weight:${i===0?700:400}">${p.pts.toFixed(1)}</td>
       <td class="num">${p.fgp.toFixed(1)}%</td><td class="num">${p.efg.toFixed(1)}%</td>
-      <td class="num">${p.ftp.toFixed(1)}%</td><td class="num">${p.usg.toFixed(1)}%</td>
-      <td class="num">${p.eff.toFixed(1)}</td><td class="num">${p.ppp.toFixed(2)}</td>
+      <td class="num">${p.ftp.toFixed(1)}%</td><td class="num">${p.ppp.toFixed(2)}</td>
       <td class="num ${p.pm>=0?'pm-pos':'pm-neg'}">${pm}</td>
+      <td class="num fp-val">${p.fp.toFixed(1)}</td>
+      <td class="num">${p.eff.toFixed(1)}</td><td class="num">${p.usg.toFixed(1)}%</td>
     </tr>`;
   }).join('');
 }
