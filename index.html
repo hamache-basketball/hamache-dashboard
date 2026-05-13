@@ -476,7 +476,12 @@ function updatePlayer() {
 
   // サマリー
   const allNames = [...new Set(D.player.map(r=>r['コートネーム']).filter(Boolean))];
-  const teamAvg  = allNames.map(nm=>avg(D.player.filter(r=>r['コートネーム']===nm),'PTS')).reduce((a,b)=>a+b,0)/allNames.length;
+  const teamAvg = allNames.map(nm=>{
+    const nr = D.player.filter(r=>r['コートネーム']===nm);
+    const gids = [...new Set(nr.map(r=>r['GameID']))];
+    const total = gids.reduce((s,gid)=>s+nr.filter(r=>r['GameID']===gid).reduce((a,r)=>a+n(r['PTS']),0),0);
+    return gids.length>0?total/gids.length:0;
+  }).reduce((a,b)=>a+b,0)/allNames.length;
   const myAvgPts = gameStats.reduce((a,g)=>a+g.pts,0)/gameStats.length;
 
   document.getElementById('p-pts').textContent     = myAvgPts.toFixed(1);
@@ -621,8 +626,11 @@ function renderTeamRank(cat) {
     if(!rows.length) return null;
     const gids = [...new Set(rows.map(r=>r['GameID']))];
     const pppKey = Object.keys(rows[0]).find(k=>k.includes('PPP'))||'PPP';
+    // PTSは試合ごとに合算してから試合数で割る
+    const totalPts = gids.reduce((sum,gid)=>sum+rows.filter(r=>r['GameID']===gid).reduce((a,r)=>a+n(r['PTS']),0),0);
+    const avgPts   = gids.length>0 ? totalPts/gids.length : 0;
     return { name, no:rows[0]['#'], games:gids.length,
-      pts:avg(rows,'PTS'), fgp:avg(rows,'FGA')>0?avg(rows,'FGM')/avg(rows,'FGA')*100:0,
+      pts:avgPts, fgp:avg(rows,'FGA')>0?avg(rows,'FGM')/avg(rows,'FGA')*100:0,
       efg:avg(rows,'eFG%'), ftp:avg(rows,'FT%'), usg:avg(rows,'USG%'), eff:avg(rows,'EFF'),
       ppp:avg(rows,pppKey),
       pm:rows.reduce((a,r)=>a+n(r['＋/－']||r['+/-']||0),0)/gids.length };
