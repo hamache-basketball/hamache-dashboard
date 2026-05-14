@@ -114,7 +114,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 .rpt-pb-bars{display:flex;gap:3px;align-items:flex-end;height:80px}
 .rpt-pb-bar{width:16px;border-radius:2px 2px 0 0}
 .rpt-pb-lbl{font-size:10px;color:var(--muted);font-family:var(--mono)}
-.rpt-pb-score{font-size:10px;font-family:var(--mono)}
+.rpt-pb-score{font-size:13px;font-family:var(--mono);font-weight:500}
 .rpt-legend{display:flex;gap:12px;font-size:10px;color:var(--muted);margin-top:8px}
 .rpt-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
 .rpt-bc-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
@@ -686,7 +686,7 @@ function updatePlayer() {
 
 function renderPlayerBars(name, myRows) {
   const allNames = [...new Set(D.player.map(r=>r['コートネーム']).filter(Boolean))];
-  const metrics = [{label:'得点',key:'PTS'},{label:'アシスト',key:'AST'},{label:'リバウンド',key:'DR'},{label:'USG%',key:'USG%'},{label:'EFF',key:'EFF'}];
+  const metrics = [{label:'得点',key:'PTS'},{label:'アシスト',key:'AST'},{label:'リバウンド',key:'DR'},{label:'スティール',key:'STL'},{label:'ブロック',key:'BLK'}];
   const colors  = ['#4f8ef7','#7f77dd','#38d9a9','#f7a84f','#4f8ef7'];
   document.getElementById('player-bars').innerHTML = metrics.map((m,ci)=>{
     const allAvg = allNames.map(nm=>({name:nm,val:avg(D.player.filter(r=>r['コートネーム']===nm),m.key)})).sort((a,b)=>b.val-a.val);
