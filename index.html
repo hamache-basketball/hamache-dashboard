@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>チームダッシュボード</title>
+<title>浜っちダッシュボード</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -126,6 +126,12 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 .rpt-fp-track{flex:1;height:12px;background:var(--bg3);border-radius:3px;overflow:hidden}
 .rpt-fp-fill{height:100%;border-radius:3px;background:var(--accent3)}
 .rpt-fp-val{width:32px;font-size:12px;font-family:var(--mono);color:var(--accent3);text-align:right}
+.factors-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.factors-label{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.factors-note{font-size:10px;font-weight:400;margin-left:6px}
+.factors-note.good{color:var(--accent2)}
+.factors-note.bad{color:var(--danger)}
+@media(max-width:768px){.factors-grid{grid-template-columns:1fr}}
 @media(max-width:768px){.rpt-grid2,.rpt-grid3,.rpt-factors{grid-template-columns:1fr}}
 .term-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:20px}
 .term-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--term-color,var(--accent));border-radius:var(--radius);padding:14px 16px}
@@ -367,6 +373,31 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   </div>
   <div class="section-head">得点・失点推移（全試合）</div>
   <div class="chart-wrap"><canvas id="teamChart" height="140"></canvas></div>
+
+  <div class="section-head">4 Factors 試合別推移</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:var(--muted)">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--accent);display:inline-block;border-radius:2px"></span>浜っち</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:0;border-top:2px dashed var(--lose);display:inline-block"></span>相手</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:0;border-top:2px dotted rgba(79,142,247,0.4);display:inline-block"></span>自チームAvg</span>
+  </div>
+  <div class="factors-grid">
+    <div class="chart-wrap">
+      <div class="factors-label">eFG% <span class="factors-note good">高いほど良</span></div>
+      <div style="position:relative;height:130px"><canvas id="teamFactorEFG" role="img" aria-label="eFG%の試合別推移">eFG%推移</canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="factors-label">TO% <span class="factors-note bad">低いほど良</span></div>
+      <div style="position:relative;height:130px"><canvas id="teamFactorTO" role="img" aria-label="TO%の試合別推移">TO%推移</canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="factors-label">OR% <span class="factors-note good">高いほど良</span></div>
+      <div style="position:relative;height:130px"><canvas id="teamFactorOR" role="img" aria-label="OR%の試合別推移">OR%推移</canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="factors-label">FTR <span class="factors-note good">高いほど良</span></div>
+      <div style="position:relative;height:130px"><canvas id="teamFactorFTR" role="img" aria-label="FTRの試合別推移">FTR推移</canvas></div>
+    </div>
+  </div>
 </div>
 
 <!-- 試合レポート -->
@@ -513,6 +544,7 @@ function col(obj, ...parts) {
    ======================================== */
 let D = { game:[], lineup:[], player:[] };
 let chartP = null, chartT = null;
+let chartFactorEFG=null, chartFactorTO=null, chartFactorOR=null, chartFactorFTR=null;
 
 /* ========================================
    初期化
@@ -851,6 +883,41 @@ function updateTeamChart(games, getPts, getOpp) {
   if(!chartT){
     chartT = new Chart(document.getElementById('teamChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'チーム得点',data:tPts,backgroundColor:'rgba(79,142,247,.7)',borderRadius:4},{label:'失点',data:oPts,backgroundColor:'rgba(240,111,111,.5)',borderRadius:4}]},options:opts});
   } else { chartT.data.labels=labels; chartT.data.datasets[0].data=tPts; chartT.data.datasets[1].data=oPts; chartT.update(); }
+  updateFactorCharts(games);
+}
+
+function updateFactorCharts(games) {
+  const labels = games.map(g=>g['GameID']);
+  const factors = [
+    { chartVar:'chartFactorEFG', id:'teamFactorEFG', usKey:'Team\n_FG%',  oppKey:'Opp_\nFG%',  unit:'%' },
+    { chartVar:'chartFactorTO',  id:'teamFactorTO',  usKey:'Team\n_TO%',  oppKey:'Opp_\nTO%',  unit:'%' },
+    { chartVar:'chartFactorOR',  id:'teamFactorOR',  usKey:'Team\n_OR%',  oppKey:'Opp_\nOR%',  unit:'%' },
+    { chartVar:'chartFactorFTR', id:'teamFactorFTR', usKey:'Team\n_FTR',  oppKey:'Opp_\nFTR',  unit:''  },
+  ];
+  const scaleOpts = (unit) => ({
+    x:{ ticks:{color:'#7a8099',font:{size:10},autoSkip:true,maxTicksLimit:7}, grid:{color:'rgba(255,255,255,.04)'} },
+    y:{ ticks:{color:'#7a8099',font:{size:10},callback:v=>v+unit}, grid:{color:'rgba(255,255,255,.04)'}, beginAtZero:false }
+  });
+  factors.forEach(fc=>{
+    const usData  = games.map(g=>parseFloat(g[fc.usKey])||0);
+    const oppData = games.map(g=>parseFloat(g[fc.oppKey])||0);
+    const avgUs   = usData.reduce((a,b)=>a+b,0)/usData.length;
+    const datasets = [
+      { label:'浜っち', data:usData,  borderColor:'#4f8ef7', backgroundColor:'transparent', borderWidth:2, pointRadius:2.5, pointBackgroundColor:'#4f8ef7', tension:0.35 },
+      { label:'相手',   data:oppData, borderColor:'#f06f6f', backgroundColor:'transparent', borderWidth:1.5, borderDash:[4,3], pointRadius:2, pointBackgroundColor:'#f06f6f', tension:0.35 },
+      { label:'Avg',    data:Array(labels.length).fill(parseFloat(avgUs.toFixed(1))), borderColor:'rgba(79,142,247,0.35)', backgroundColor:'transparent', borderWidth:1, borderDash:[2,4], pointRadius:0 },
+    ];
+    const existing = window[fc.chartVar];
+    if(existing){ existing.destroy(); window[fc.chartVar]=null; }
+    window[fc.chartVar] = new Chart(document.getElementById(fc.id).getContext('2d'),{
+      type:'line',
+      data:{ labels, datasets },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales: scaleOpts(fc.unit)
+      }
+    });
+  });
 }
 
 /* ========================================
