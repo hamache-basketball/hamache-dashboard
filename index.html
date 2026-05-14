@@ -206,7 +206,10 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 <!-- モバイル用下部ナビ -->
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
-    <button class="mobile-nav-item active" onclick="navigate('game',this)">
+    <button class="mobile-nav-item active" onclick="navigate('report',this)">
+      <span class="mobile-nav-icon">📋</span>試合レポート
+    </button>
+    <button class="mobile-nav-item" onclick="navigate('game',this)">
       <span class="mobile-nav-icon">🏀</span>試合分析
     </button>
     <button class="mobile-nav-item" onclick="navigate('player',this)">
@@ -217,9 +220,6 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     </button>
     <button class="mobile-nav-item" onclick="navigate('team',this)">
       <span class="mobile-nav-icon">📊</span>チーム全体
-    </button>
-    <button class="mobile-nav-item" onclick="navigate('report',this)">
-      <span class="mobile-nav-icon">📋</span>試合レポート
     </button>
   </div>
 </nav>
@@ -232,18 +232,18 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   </div>
   <div class="nav-section">
     <div class="nav-label">メニュー</div>
-    <button class="nav-item active" onclick="navigate('game',this)"><span class="nav-icon">🏀</span>試合分析</button>
+    <button class="nav-item active" onclick="navigate('report',this)"><span class="nav-icon">📋</span>試合レポート</button>
+    <button class="nav-item" onclick="navigate('game',this)"><span class="nav-icon">🏀</span>試合分析</button>
     <button class="nav-item" onclick="navigate('player',this)"><span class="nav-icon">👤</span>選手個人</button>
     <button class="nav-item" onclick="navigate('lineup',this)"><span class="nav-icon">👥</span>ラインアップ</button>
     <button class="nav-item" onclick="navigate('team',this)"><span class="nav-icon">📊</span>チーム全体</button>
-    <button class="nav-item" onclick="navigate('report',this)"><span class="nav-icon">📋</span>試合レポート</button>
   </div>
 </nav>
 
 <main class="main">
 
 <!-- 試合分析 -->
-<div id="page-game" class="page active">
+<div id="page-game" class="page">
   <div class="page-header"><div class="page-title">試合分析</div><div class="page-sub">試合ごとのチーム・選手スタッツを確認</div></div>
   <div id="err-game" class="error-msg"></div>
   <div class="filter-bar">
@@ -401,7 +401,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 </div>
 
 <!-- 試合レポート -->
-<div id="page-report" class="page">
+<div id="page-report" class="page active">
   <div class="page-header"><div class="page-title">試合レポート</div><div class="page-sub">試合の流れと貢献度をビジュアルで確認</div></div>
   <div class="filter-bar">
     <span class="filter-label">試合</span>
@@ -430,8 +430,17 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   <div class="rpt-section-head">① 4 Factors — 勝敗を分けた4指標</div>
   <div class="rpt-factors" id="rpt-factors"></div>
 
-  <!-- ② ピリオド別 + モメンタム -->
-  <div class="rpt-section-head">② ピリオド別スコア & 得失点差の流れ</div>
+  <!-- ② ポゼッションフロー -->
+  <div class="rpt-section-head">② ポゼッションフロー（Offense Flow）</div>
+  <div class="rpt-card" style="margin-bottom:20px">
+    <div class="rpt-card-title">攻撃ポゼッションの内訳フロー</div>
+    <div id="rpt-sankey-wrap" style="width:100%;overflow-x:auto">
+      <svg id="rpt-sankey-svg" style="display:block;margin:0 auto"></svg>
+    </div>
+  </div>
+
+  <!-- ③ ピリオド別 + モメンタム -->
+  <div class="rpt-section-head">③ ピリオド別スコア & 得失点差の流れ</div>
   <div class="rpt-grid2">
     <div class="rpt-card">
       <div class="rpt-card-title">ピリオド別得点</div>
@@ -446,7 +455,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   </div>
 
   <!-- ③ Board Control + FPランキング -->
-  <div class="rpt-section-head">③ リバウンド支配 | FP ランキング</div>
+  <div class="rpt-section-head">④ リバウンド支配 | FP ランキング</div>
   <div class="rpt-grid2">
     <div class="rpt-card">
       <div class="rpt-card-title">Board Control（リバウンド支配）</div>
@@ -464,7 +473,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   </div>
 
   <!-- ③-2 貢献度マップ 2枚 -->
-  <div class="rpt-section-head">④ 貢献度マップ — FP × USG% &nbsp;|&nbsp; EFF × USG%</div>
+  <div class="rpt-section-head">⑤ 貢献度マップ — FP × USG% &nbsp;|&nbsp; EFF × USG%</div>
   <div class="rpt-grid2">
     <div class="rpt-card">
       <div class="rpt-card-title">貢献度マップ A &nbsp;— FP × USG%&nbsp;<span style="color:var(--muted);font-size:9px">（総合貢献 × 攻撃負荷）</span></div>
@@ -479,7 +488,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   </div>
 
   <!-- ④ ラインアップ + 4Factorsレーダー -->
-  <div class="rpt-section-head">⑤ ラインアップ TOP3 | 4 Factors レーダー</div>
+  <div class="rpt-section-head">⑥ ラインアップ TOP3 | 4 Factors レーダー</div>
   <div class="rpt-grid2">
     <div class="rpt-card">
       <div class="rpt-card-title">ラインアップ TOP3（+/− 降順）</div>
@@ -560,6 +569,7 @@ async function init() {
     buildFilters();
     updateGame();
     updateTeam();
+    updateReport();
   } catch(e) {
     const el = document.getElementById('err-game');
     el.textContent = `データ読み込みエラー:\n${e.message}\n\n確認事項:\n・スプレッドシートの共有設定が「リンクを知っている全員が閲覧可」になっているか\n・シート名が正しいか（DB_Game_1 / DB_Lineup_2 / DB_Player_3）`;
@@ -941,6 +951,120 @@ function navigate(page, btn) {
    ======================================== */
 let rptMomentumChart=null, rptScatterChart=null, rptScatterEffChart=null, rptRadarChart=null;
 
+/* ========================================
+   Sankeyダイアグラム描画
+   ======================================== */
+function drawSankey(g, playerRows) {
+  // データ集計
+  const pa2 = playerRows.reduce((a,r)=>a+n(r['2PA']),0);
+  const pm2 = playerRows.reduce((a,r)=>a+n(r['2PM']),0);
+  const pa3 = playerRows.reduce((a,r)=>a+n(r['3PA']),0);
+  const pm3 = playerRows.reduce((a,r)=>a+n(r['3PM']),0);
+  const fga = pa2+pa3;
+  const miss2 = pa2-pm2, miss3 = pa3-pm3;
+  const totalMisses = miss2+miss3;
+  const orb = n(g['Team\n_OR'])||playerRows.reduce((a,r)=>a+n(r['OR']),0);
+  const defRebLost = totalMisses-orb;
+  const fta = n(g['Team\n_FTA'])||0;
+  const ftm = n(g['Team\n_FTM'])||0;
+  const ftMiss = fta-ftm;
+  const to  = n(g['Team\n_TO'])||0;
+  const offense = fga+to+Math.round(fta*0.44);
+
+  // ノード・リンク定義
+  const nodes = [
+    {id:'offense',  label:`Offense\n${offense}`,  x:0},
+    {id:'fga',      label:`FGA\n${fga}`,           x:1},
+    {id:'to',       label:`Turnovers\n${to}`,      x:1},
+    {id:'ft',       label:`Free Throws\n${fta}`,   x:1},
+    {id:'p2a',      label:`2P Attempts\n${pa2}`,   x:2},
+    {id:'p3a',      label:`3P Attempts\n${pa3}`,   x:2},
+    {id:'p2m',      label:`2P Made\n${pm2}`,       x:3},
+    {id:'p2miss',   label:`2P Missed\n${miss2}`,   x:3},
+    {id:'p3m',      label:`3P Made\n${pm3}`,       x:3},
+    {id:'p3miss',   label:`3P Missed\n${miss3}`,   x:3},
+    {id:'totalmiss',label:`Total Misses\n${totalMisses}`, x:4},
+    {id:'orkeep',   label:`Off.Reb(Keep)\n${orb}`, x:5},
+    {id:'drlost',   label:`Def.Reb(Lost)\n${defRebLost}`, x:5},
+    {id:'ftm',      label:`FT Made\n${ftm}`,       x:3},
+    {id:'ftmiss',   label:`FT Missed\n${ftMiss}`,  x:3},
+  ];
+  const links = [
+    {s:'offense',src:'offense',tgt:'fga',     val:fga},
+    {s:'offense',src:'offense',tgt:'to',      val:to},
+    {s:'offense',src:'offense',tgt:'ft',      val:fta},
+    {s:'fga',    src:'fga',    tgt:'p2a',     val:pa2},
+    {s:'fga',    src:'fga',    tgt:'p3a',     val:pa3},
+    {s:'p2a',    src:'p2a',    tgt:'p2m',     val:pm2},
+    {s:'p2a',    src:'p2a',    tgt:'p2miss',  val:miss2},
+    {s:'p3a',    src:'p3a',    tgt:'p3m',     val:pm3},
+    {s:'p3a',    src:'p3a',    tgt:'p3miss',  val:miss3},
+    {s:'miss',   src:'p2miss', tgt:'totalmiss',val:miss2},
+    {s:'miss',   src:'p3miss', tgt:'totalmiss',val:miss3},
+    {s:'miss',   src:'totalmiss',tgt:'orkeep',val:orb},
+    {s:'miss',   src:'totalmiss',tgt:'drlost',val:defRebLost},
+    {s:'ft',     src:'ft',     tgt:'ftm',     val:ftm},
+    {s:'ft',     src:'ft',     tgt:'ftmiss',  val:ftMiss},
+  ].filter(l=>l.val>0);
+
+  // SVG描画
+  const W=680, H=420, padL=20, padR=120, padT=20, padB=20;
+  const cols=6, colW=(W-padL-padR)/cols;
+  const nodeW=14;
+  const colors={'offense':'#4f8ef7','fga':'#7f77dd','to':'#f06f6f','ft':'#f7a84f','p2a':'#7f77dd','p3a':'#9f97ef','p2m':'#38d9a9','p2miss':'#f06f6f','p3m':'#38d9a9','p3miss':'#f06f6f','totalmiss':'#f06f6f','orkeep':'#4f8ef7','drlost':'#7a8099','ftm':'#38d9a9','ftmiss':'#7a8099'};
+
+  // 各列のノードを縦に配置
+  const colNodes={};
+  nodes.forEach(nd=>{ if(!colNodes[nd.x]) colNodes[nd.x]=[]; colNodes[nd.x].push(nd); });
+  const nodeH={}, nodeY={};
+  Object.keys(colNodes).forEach(cx=>{
+    const nds=colNodes[cx]; const total=nds.reduce((a,nd)=>a+getNodeVal(nd.id,links),0)||1;
+    const drawH=H-padT-padB; let y=padT;
+    nds.forEach(nd=>{
+      const v=getNodeVal(nd.id,links)||1;
+      const h=Math.max(8,Math.round(v/offense*(drawH-nds.length*4)));
+      nodeH[nd.id]=h; nodeY[nd.id]=y; y+=h+4;
+    });
+  });
+  function getNodeVal(id,links){ const out=links.filter(l=>l.src===id).reduce((a,l)=>a+l.val,0); const inn=links.filter(l=>l.tgt===id).reduce((a,l)=>a+l.val,0); return Math.max(out,inn); }
+  function nx(x){ return padL+x*colW+colW/2-nodeW/2; }
+
+  let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="font-family:var(--mono)">`;
+
+  // リンク描画（先に）
+  const srcOffset={}, tgtOffset={};
+  links.forEach(l=>{
+    if(!srcOffset[l.src]) srcOffset[l.src]=0;
+    if(!tgtOffset[l.tgt]) tgtOffset[l.tgt]=0;
+    const snd=nodes.find(n=>n.id===l.src), tnd=nodes.find(n=>n.id===l.tgt);
+    const x1=nx(snd.x)+nodeW, x2=nx(tnd.x);
+    const h=Math.max(2,Math.round(l.val/offense*nodeH[l.src]));
+    const y1=nodeY[l.src]+srcOffset[l.src]+h/2;
+    const y2=nodeY[l.tgt]+tgtOffset[l.tgt]+h/2;
+    const mx=(x1+x2)/2;
+    const col=colors[l.src]||'#4f8ef7';
+    svg+=`<path d="M${x1},${nodeY[l.src]+srcOffset[l.src]} C${mx},${nodeY[l.src]+srcOffset[l.src]} ${mx},${nodeY[l.tgt]+tgtOffset[l.tgt]} ${x2},${nodeY[l.tgt]+tgtOffset[l.tgt]} L${x2},${nodeY[l.tgt]+tgtOffset[l.tgt]+h} C${mx},${nodeY[l.tgt]+tgtOffset[l.tgt]+h} ${mx},${nodeY[l.src]+srcOffset[l.src]+h} ${x1},${nodeY[l.src]+srcOffset[l.src]+h} Z" fill="${col}" opacity="0.35"/>`;
+    srcOffset[l.src]+=h;
+    tgtOffset[l.tgt]+=h;
+  });
+
+  // ノード描画
+  nodes.forEach(nd=>{
+    if(nodeH[nd.id]===undefined) return;
+    const x=nx(nd.x), y=nodeY[nd.id], h=nodeH[nd.id], col=colors[nd.id]||'#4f8ef7';
+    svg+=`<rect x="${x}" y="${y}" width="${nodeW}" height="${h}" rx="3" fill="${col}" opacity="0.9"/>`;
+    const parts=nd.label.split('\n');
+    const ty=y+h/2;
+    const anchor=nd.x>=3?'start':'end';
+    const tx=nd.x>=3?x+nodeW+5:x-5;
+    svg+=`<text x="${tx}" y="${ty-5}" text-anchor="${anchor}" font-size="9" fill="var(--color-text-primary,#e8eaf0)">${parts[0]}</text>`;
+    svg+=`<text x="${tx}" y="${ty+7}" text-anchor="${anchor}" font-size="10" font-weight="500" fill="${col}">${parts[1]}</text>`;
+  });
+
+  svg+='</svg>';
+  document.getElementById('rpt-sankey-svg').outerHTML=svg;
+}
+
 function updateReport() {
   const idx = parseInt(document.getElementById('sel-report-game').value||0);
   const g = D.game[idx]; if(!g) return;
@@ -1033,6 +1157,7 @@ function updateReport() {
 
   // Board Control
   const playerRows=D.player.filter(r=>r['GameID']===g['GameID']);
+  drawSankey(g, playerRows);
   const totalOR=playerRows.reduce((a,r)=>a+n(r['OR']),0);
   const totalDR=playerRows.reduce((a,r)=>a+n(r['DR']),0);
   const oppOR=n(g['Opp\n_OR']); const oppDR=n(g['Opp\n_DR']);
