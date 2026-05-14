@@ -1239,7 +1239,7 @@ function updateReport() {
   rptRadarChart=new Chart(document.getElementById('rpt-radar-chart').getContext('2d'),{
     type:'radar',
     data:{
-      labels:['eFG%','OR%','FTR','PACE','TO%\n(低いほど良)'],
+      labels:['eFG%','OR%','FTR','PACE',['TO%','(外→TO%低い)']],
       datasets:[
         {label:'浜っち',data:[norm(g['Team\n_FG%'],20,60),norm(g['Team\n_OR%'],10,60),norm(g['Team\n_FTR'],0,0.6),norm(g['PACE'],40,80),100-norm(g['Team\n_TO%'],5,40)],
           borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,0.15)',borderWidth:2,pointRadius:3},
