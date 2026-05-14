@@ -434,9 +434,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   <div class="rpt-section-head">② ポゼッションフロー（Offense Flow）</div>
   <div class="rpt-card" style="margin-bottom:20px">
     <div class="rpt-card-title">攻撃ポゼッションの内訳フロー</div>
-    <div id="rpt-sankey-wrap" style="width:100%;overflow-x:auto">
-      <svg id="rpt-sankey-svg" style="display:block;margin:0 auto"></svg>
-    </div>
+    <div id="rpt-sankey-wrap" style="width:100%;overflow-x:auto"></div>
   </div>
 
   <!-- ③ ピリオド別 + モメンタム -->
@@ -1062,7 +1060,7 @@ function drawSankey(g, playerRows) {
   });
 
   svg+='</svg>';
-  document.getElementById('rpt-sankey-svg').outerHTML=svg;
+  document.getElementById('rpt-sankey-wrap').innerHTML = svg;
 }
 
 function updateReport() {
