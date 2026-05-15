@@ -1203,7 +1203,7 @@ function updateReport() {
   }));
   rptScatterChart=new Chart(document.getElementById('rpt-scatter-chart').getContext('2d'),{
     type:'bubble',
-    data:{datasets:[{label:'選手',data:scatData,backgroundColor:'rgba(79,142,247,0.25)',borderColor:'#4f8ef7',borderWidth:1.5}]},
+    data:{datasets:[{label:'選手',data:scatData,backgroundColor:'rgba(247,168,79,0.25)',borderColor:'#f7a84f',borderWidth:1.5}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:d=>`${d.raw.label}  FP:${d.raw.y.toFixed(1)}  USG:${d.raw.x.toFixed(1)}%`}}},
       scales:{
@@ -1220,7 +1220,7 @@ function updateReport() {
   }));
   rptScatterEffChart=new Chart(document.getElementById('rpt-scatter-eff-chart').getContext('2d'),{
     type:'bubble',
-    data:{datasets:[{label:'選手',data:scatEffData,backgroundColor:'rgba(247,168,79,0.22)',borderColor:'#f7a84f',borderWidth:1.5}]},
+    data:{datasets:[{label:'選手',data:scatEffData,backgroundColor:'rgba(79,142,247,0.22)',borderColor:'#4f8ef7',borderWidth:1.5}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:d=>`${d.raw.label}  EFF:${d.raw.y.toFixed(1)}  USG:${d.raw.x.toFixed(1)}%`}}},
       scales:{
