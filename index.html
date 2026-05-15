@@ -763,8 +763,9 @@ function renderPlayerGames(gameStats) {
 }
 
 function updatePlayerChart(gameStats) {
-  const labels = gameStats.map(g=>g.gid);
-  const data   = gameStats.map(g=>g.pts);
+  const chartData = [...gameStats].reverse();
+  const labels = chartData.map(g=>g.gid);
+  const data   = chartData.map(g=>g.pts);
   const opts = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a8099',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#7a8099',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}};
   if(!chartP){
     chartP = new Chart(document.getElementById('playerChart').getContext('2d'),{type:'line',data:{labels,datasets:[{label:'得点',data,borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#4f8ef7',tension:.35,fill:true}]},options:opts});
