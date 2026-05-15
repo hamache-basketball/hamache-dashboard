@@ -377,7 +377,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   <div class="section-head">4 Factors 試合別推移</div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:var(--muted)">
     <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--accent);display:inline-block;border-radius:2px"></span>浜っち</span>
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:0;border-top:2px dashed var(--lose);display:inline-block"></span>相手</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--lose);display:inline-block;border-radius:2px"></span>相手</span>
     <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:0;border-top:2px dashed rgba(79,142,247,0.6);display:inline-block"></span>トレンド（直近5試合移動平均）</span>
   </div>
   <div class="factors-grid">
@@ -918,7 +918,7 @@ function updateFactorCharts(games) {
     const trendData = movingAvg(usData, 5);
     const datasets = [
       { label:'浜っち', data:usData,  borderColor:'#4f8ef7', backgroundColor:'transparent', borderWidth:2, pointRadius:2.5, pointBackgroundColor:'#4f8ef7', tension:0.35 },
-      { label:'相手',   data:oppData, borderColor:'#f06f6f', backgroundColor:'transparent', borderWidth:1.5, borderDash:[4,3], pointRadius:2, pointBackgroundColor:'#f06f6f', tension:0.35 },
+      { label:'相手',   data:oppData, borderColor:'#f06f6f', backgroundColor:'transparent', borderWidth:1.5, pointRadius:2, pointBackgroundColor:'#f06f6f', tension:0.35 },
       { label:'トレンド(直近5試合)', data:trendData, borderColor:'rgba(79,142,247,0.6)', backgroundColor:'transparent', borderWidth:1.5, borderDash:[4,3], pointRadius:0, tension:0.4 },
     ];
     const existing = window[fc.chartVar];
