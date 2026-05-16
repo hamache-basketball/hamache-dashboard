@@ -127,6 +127,13 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 .rpt-fp-fill{height:100%;border-radius:3px;background:var(--accent3)}
 .rpt-fp-val{width:32px;font-size:12px;font-family:var(--mono);color:var(--accent3);text-align:right}
 .factors-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.slide-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--muted)}
+.slide-placeholder-icon{font-size:36px}
+.slide-placeholder-text{font-size:13px;font-family:var(--mono)}
+.slide-embed-wrap{position:relative;width:100%;padding-top:56.25%}
+.slide-embed-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:var(--radius)}
+.slide-open-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--accent);font-size:12px;font-family:var(--mono);text-decoration:none;transition:background .15s}
+.slide-open-btn:hover{background:rgba(79,142,247,0.1)}
 .factors-label{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
 .factors-note{font-size:10px;font-weight:400;margin-left:6px}
 .factors-note.good{color:var(--accent2)}
@@ -500,6 +507,17 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     <div class="rpt-card">
       <div class="rpt-card-title">4 Factors レーダー（vs 相手）</div>
       <canvas id="rpt-radar-chart" style="max-height:220px"></canvas>
+    </div>
+  </div>
+
+  <!-- ⑦ 詳細分析レポート -->
+  <div class="rpt-section-head">⑦ 詳細分析レポート</div>
+  <div class="rpt-card" style="margin-bottom:24px">
+    <div id="rpt-slide-wrap">
+      <div class="slide-placeholder">
+        <div class="slide-placeholder-icon">📄</div>
+        <div class="slide-placeholder-text">この試合の詳細分析レポートは準備中です</div>
+      </div>
     </div>
   </div>
 </div>
@@ -951,8 +969,33 @@ function navigate(page, btn) {
 }
 
 /* ========================================
-   試合レポートページ
+   詳細分析レポート（Googleスライド）
+   ここにGameIDとスライドURLを追加していく
    ======================================== */
+const SLIDE_REPORTS = {
+  '20260506_給田': 'https://docs.google.com/presentation/d/1DmnqXI1pO4KT73vRAMNy6aOc9ayTFQGJGdiKEq2bXy8/embed?start=false&loop=false&delayms=0',
+  // 新しいレポートを追加する場合はここに追記:
+  // 'GameID': 'https://docs.google.com/presentation/d/xxxxxxxxxx/embed?start=false&loop=false&delayms=0',
+};
+
+function renderSlide(gameID) {
+  const wrap = document.getElementById('rpt-slide-wrap');
+  const url  = SLIDE_REPORTS[gameID];
+  if (!url) {
+    wrap.innerHTML = `<div class="slide-placeholder">
+      <div class="slide-placeholder-icon">📄</div>
+      <div class="slide-placeholder-text">この試合の詳細分析レポートは準備中です</div>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="slide-embed-wrap">
+      <iframe src="${url}" allowfullscreen></iframe>
+    </div>
+    <a class="slide-open-btn" href="${url.replace('/embed?start=false&loop=false&delayms=0','/edit')}" target="_blank">
+      🔗 スライドを別タブで開く
+    </a>`;
+}
 let rptMomentumChart=null, rptScatterChart=null, rptScatterEffChart=null, rptRadarChart=null;
 
 /* ========================================
@@ -1080,6 +1123,7 @@ function updateReport() {
   document.getElementById('rpt-us').textContent  = us;
   document.getElementById('rpt-opp').textContent = op;
   document.getElementById('rpt-meta').textContent= `${g['GameID']} | ${g['DATE']} | vs ${g['対戦相手']}`;
+  renderSlide(g['GameID']);
   const bd = document.getElementById('rpt-badge');
   bd.textContent = res||'—';
   bd.className = 'badge '+(res==='WIN'?'badge-win':res==='LOSE'?'badge-lose':'badge-draw');
