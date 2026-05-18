@@ -128,6 +128,24 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
 .rpt-fp-val{width:32px;font-size:12px;font-family:var(--mono);color:var(--accent3);text-align:right}
 .factors-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
 .slide-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--muted)}
+/* 結論サマリー */
+.rpt-conclusion{background:var(--bg2);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--text);line-height:1.7}
+.rpt-conclusion-label{font-size:10px;font-family:var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+/* 勝因・敗因 */
+.rpt-wl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.rpt-wl-card{border-radius:var(--radius);padding:14px 16px}
+.rpt-wl-win{background:rgba(56,217,169,0.06);border:1px solid rgba(56,217,169,0.2)}
+.rpt-wl-lose{background:rgba(240,111,111,0.06);border:1px solid rgba(240,111,111,0.2)}
+.rpt-wl-title{font-size:11px;font-weight:600;margin-bottom:10px;font-family:var(--mono)}
+.rpt-wl-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text);margin-bottom:6px;line-height:1.5}
+.rpt-wl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+/* 傾向コメント */
+.trend-comment-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.trend-comment-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.trend-comment-metric{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.trend-comment-text{font-size:11px;color:var(--text);line-height:1.6}
+.trend-up{color:var(--accent2)}.trend-down{color:var(--lose)}.trend-flat{color:var(--muted)}
+@media(max-width:768px){.rpt-wl-grid{grid-template-columns:1fr}.trend-comment-grid{grid-template-columns:1fr 1fr}}
 .slide-placeholder-icon{font-size:36px}
 .slide-placeholder-text{font-size:13px;font-family:var(--mono)}
 .slide-embed-wrap{position:relative;width:100%;padding-top:56.25%}
@@ -382,6 +400,7 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
   <div class="chart-wrap"><canvas id="teamChart" height="140"></canvas></div>
 
   <div class="section-head">4 Factors 試合別推移</div>
+  <div id="team-trend-comment" class="trend-comment-grid"></div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:var(--muted)">
     <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--accent);display:inline-block;border-radius:2px"></span>浜っち</span>
     <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--lose);display:inline-block;border-radius:2px"></span>相手</span>
@@ -433,9 +452,14 @@ tbody tr.top-row td{background:rgba(79,142,247,.06)}
     </div>
   </div>
 
+  <!-- この試合の結論 -->
+  <div id="rpt-conclusion" class="rpt-conclusion"></div>
+
   <!-- ① 4 Factors -->
   <div class="rpt-section-head">① 4 Factors — 勝敗を分けた4指標</div>
   <div class="rpt-factors" id="rpt-factors"></div>
+  <!-- 勝因・敗因 -->
+  <div class="rpt-wl-grid" id="rpt-wl-grid"></div>
 
   <!-- ② ポゼッションフロー -->
   <div class="rpt-section-head">② ポゼッションフロー（Offense Flow）</div>
@@ -853,6 +877,7 @@ function updateTeam() {
 
   renderTeamRank(cat);
   updateTeamChart(games, g=>n(g['Team_\nPTS']), g=>n(g['Opp_\nPTS']));
+  renderTrendComment(games);
 }
 
 function avgColHelper(games, ...parts) {
@@ -969,6 +994,96 @@ function navigate(page, btn) {
 }
 
 /* ========================================
+   ① この試合の結論・勝因敗因自動生成
+   ======================================== */
+function renderConclusion(g) {
+  const efgUs  = parseFloat(g['Team\n_FG%'])||0,  efgOpp = parseFloat(g['Opp_\nFG%'])||0;
+  const topUs  = parseFloat(g['Team\n_TO%'])||0,  topOpp = parseFloat(g['Opp_\nTO%'])||0;
+  const orpUs  = parseFloat(g['Team\n_OR%'])||0,  orpOpp = parseFloat(g['Opp_\nOR%'])||0;
+  const ftrUs  = parseFloat(g['Team\n_FTR'])||0,  ftrOpp = parseFloat(g['Opp_\nFTR'])||0;
+  const res    = (g['勝敗\n(WIN / LOSE / DRAW)']||'').toUpperCase();
+
+  // 各指標の勝敗判定
+  const efgWin = efgUs >= efgOpp;
+  const topWin = topUs <= topOpp; // 低いほど良
+  const orpWin = orpUs >= orpOpp;
+  const ftrWin = ftrUs >= ftrOpp;
+  const wins   = [efgWin, topWin, orpWin, ftrWin].filter(Boolean).length;
+
+  // 結論文生成
+  const winFactors  = [];
+  const loseFactors = [];
+  if(efgWin)  winFactors.push(`eFG%で相手を上回り（${efgUs.toFixed(1)}% vs ${efgOpp.toFixed(1)}%）`);
+  else       loseFactors.push(`eFG%で相手に劣勢（${efgUs.toFixed(1)}% vs ${efgOpp.toFixed(1)}%）`);
+  if(topWin)  winFactors.push(`ボール管理で優位（TO% ${topUs.toFixed(1)}% vs ${topOpp.toFixed(1)}%）`);
+  else       loseFactors.push(`ターンオーバーが多い（TO% ${topUs.toFixed(1)}% vs ${topOpp.toFixed(1)}%）`);
+  if(orpWin)  winFactors.push(`リバウンドで競り勝った（OR% ${orpUs.toFixed(1)}% vs ${orpOpp.toFixed(1)}%）`);
+  else       loseFactors.push(`リバウンドで劣勢（OR% ${orpUs.toFixed(1)}% vs ${orpOpp.toFixed(1)}%）`);
+  if(ftrWin)  winFactors.push(`フリースロー獲得で優位（FTR ${ftrUs.toFixed(2)} vs ${ftrOpp.toFixed(2)}）`);
+  else       loseFactors.push(`FTR獲得で相手に及ばず（FTR ${ftrUs.toFixed(2)} vs ${ftrOpp.toFixed(2)}）`);
+
+  const conclusionText = wins >= 3
+    ? `4 Factorsのうち${wins}項目で相手を上回る内容。${winFactors[0]}高い完成度の試合だった。`
+    : wins === 2
+    ? `4 Factorsは${wins}勝${4-wins}敗で拮抗。${winFactors.length?winFactors[0]+'が光った一方':''} ${loseFactors.length?loseFactors[0]+'が課題として残った。':''}`
+    : `4 Factorsのうち${4-wins}項目で相手に劣勢。${loseFactors[0]}が主な課題。立て直しが必要な試合だった。`;
+
+  document.getElementById('rpt-conclusion').innerHTML = `
+    <div class="rpt-conclusion-label">📋 この試合の結論</div>
+    ${conclusionText}`;
+
+  // 勝因・敗因カード
+  document.getElementById('rpt-wl-grid').innerHTML = `
+    <div class="rpt-wl-card rpt-wl-win">
+      <div class="rpt-wl-title" style="color:var(--accent2)">✅ 勝因・良かった点</div>
+      ${winFactors.map(t=>`<div class="rpt-wl-item"><div class="rpt-wl-dot" style="background:var(--accent2)"></div><span>${t}</span></div>`).join('')||'<div class="rpt-wl-item" style="color:var(--muted)">—</div>'}
+    </div>
+    <div class="rpt-wl-card rpt-wl-lose">
+      <div class="rpt-wl-title" style="color:var(--lose)">⚠️ 敗因・改善が必要な点</div>
+      ${loseFactors.map(t=>`<div class="rpt-wl-item"><div class="rpt-wl-dot" style="background:var(--lose)"></div><span>${t}</span></div>`).join('')||'<div class="rpt-wl-item" style="color:var(--muted)">—</div>'}
+    </div>`;
+}
+
+/* ========================================
+   ③ 直近5試合の傾向コメント自動生成
+   ======================================== */
+function renderTrendComment(games) {
+  if(games.length < 2) { document.getElementById('team-trend-comment').innerHTML=''; return; }
+  const recent = games.slice(0, Math.min(5, games.length));
+  const older  = games.slice(Math.min(5, games.length));
+
+  function trendOf(key, higherBetter) {
+    const vals = recent.map(g=>parseFloat(g[key])||0).filter(v=>v>0);
+    if(vals.length < 2) return null;
+    const first = vals[vals.length-1], last = vals[0];
+    const diff  = last - first;
+    const pct   = Math.abs(diff).toFixed(1);
+    const improving = higherBetter ? diff > 0 : diff < 0;
+    const flat  = Math.abs(diff) < 2;
+    if(flat) return { cls:'trend-flat', icon:'→', text:`横ばい傾向（直近5試合 avg ${(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)}%）` };
+    return improving
+      ? { cls:'trend-up',   icon:'↑', text:`改善傾向 ${pct}%上昇（直近5試合）` }
+      : { cls:'trend-down', icon:'↓', text:`悪化傾向 ${pct}%下降（直近5試合）` };
+  }
+
+  const metrics = [
+    { label:'eFG%',  key:'Team\n_FG%',  higherBetter:true  },
+    { label:'TO%',   key:'Team\n_TO%',  higherBetter:false },
+    { label:'OR%',   key:'Team\n_OR%',  higherBetter:true  },
+    { label:'FTR',   key:'Team\n_FTR',  higherBetter:true  },
+  ];
+
+  document.getElementById('team-trend-comment').innerHTML = metrics.map(m=>{
+    const t = trendOf(m.key, m.higherBetter);
+    if(!t) return '';
+    return `<div class="trend-comment-card">
+      <div class="trend-comment-metric">${m.label}</div>
+      <div class="trend-comment-text ${t.cls}">${t.icon} ${t.text}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ========================================
    詳細分析レポート（Googleスライド）
    ここにGameIDとスライドURLを追加していく
    ======================================== */
@@ -976,7 +1091,6 @@ const SLIDE_REPORTS = {
   '20260504_MUSASHI': 'https://docs.google.com/presentation/d/1DmnqXI1pO4KT73vRAMNy6aOc9ayTFQGJGdiKEq2bXy8/embed?start=false&loop=false&delayms=0',
   '20260429_泉アローズ': 'https://docs.google.com/presentation/d/16rdwYa43H6G04SuZZQvZ9SgAk7tKRBlLJT41E-6rdio/embed?start=false&loop=false&delayms=0',
   '20260506_給田': 'https://docs.google.com/presentation/d/16uziBwy9aPO2cnWw4h7eMzOPzVYcF7o8Ap3ifIwY4Wk/embed?start=false&loop=false&delayms=0',
-  '20260426_月三': 'https://docs.google.com/presentation/d/1vj6noxKROwRRYcT3hALQWAYuXZ7bKUtC6q2jzmGxpoI/embed?start=false&loop=false&delayms=0',
   // 新しいレポートを追加する場合はここに追記:
   // 'GameID': 'https://docs.google.com/presentation/d/xxxxxxxxxx/embed?start=false&loop=false&delayms=0',
 };
@@ -1127,6 +1241,7 @@ function updateReport() {
   document.getElementById('rpt-opp').textContent = op;
   document.getElementById('rpt-meta').textContent= `${g['GameID']} | ${g['DATE']} | vs ${g['対戦相手']}`;
   renderSlide(g['GameID']);
+  renderConclusion(g);
   const bd = document.getElementById('rpt-badge');
   bd.textContent = res||'—';
   bd.className = 'badge '+(res==='WIN'?'badge-win':res==='LOSE'?'badge-lose':'badge-draw');
