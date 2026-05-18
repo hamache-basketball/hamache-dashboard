@@ -1049,20 +1049,25 @@ function renderConclusion(g) {
    ======================================== */
 function renderTrendComment(games) {
   if(games.length < 2) { document.getElementById('team-trend-comment').innerHTML=''; return; }
-  // 古い順にソート（グラフと同方向）
-  const sorted = [...games].sort((a,b)=>(a['GameID']||'').localeCompare(b['GameID']||''));
-  // 直近5試合を古い順で取得
-  const recent = sorted.slice(-Math.min(5, sorted.length));
+  // スプレッドシート順（古い順）のまま末尾5件が最新5試合
+  const recent = games.slice(-Math.min(5, games.length));
+  console.log('【傾向コメント検証】直近5試合:', recent.map(g=>g['GameID']));
+  console.log('EFG% 値(古→新):', recent.map(g=>g['Team\n_FG%']));
+  console.log('FTR 値(古→新):', recent.map(g=>g['Team\n_FTR']));
 
   function trendOf(key, higherBetter) {
-    const vals = recent.map(g=>parseFloat(g[key])||0).filter(v=>v>0);
-    if(vals.length < 2) return null;
-    const first = vals[0], last = vals[vals.length-1];
+    const vals = recent.map(g=>parseFloat(g[key])||0);
+    // 有効なデータが2件以上あるか確認
+    const validVals = vals.filter(v=>v>0);
+    if(validVals.length < 2) return null;
+    // 最初と最後の有効値を使う（0を除かず順番を保持）
+    const first = vals.find(v=>v>0);
+    const last  = [...vals].reverse().find(v=>v>0);
     const diff  = last - first;
     const pct   = Math.abs(diff).toFixed(1);
     const improving = higherBetter ? diff > 0 : diff < 0;
     const flat  = Math.abs(diff) < 2;
-    if(flat) return { cls:'trend-flat', icon:'→', text:`横ばい傾向（直近5試合 avg ${(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)}%）` };
+    if(flat) return { cls:'trend-flat', icon:'→', text:`横ばい傾向（直近5試合 avg ${(validVals.reduce((a,b)=>a+b,0)/validVals.length).toFixed(1)}%）` };
     return improving
       ? { cls:'trend-up',   icon:'↑', text:`改善傾向（直近5試合で${pct}%${higherBetter?'上昇':'低下'}）` }
       : { cls:'trend-down', icon:'↓', text:`悪化傾向（直近5試合で${pct}%${higherBetter?'低下':'上昇'}）` };
