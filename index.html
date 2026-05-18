@@ -1053,9 +1053,9 @@ function renderTrendComment(games) {
   const older  = games.slice(Math.min(5, games.length));
 
   function trendOf(key, higherBetter) {
-    const vals = recent.map(g=>parseFloat(g[key])||0).filter(v=>v>0);
+    const vals = recent.map(g=>parseFloat(g[key])||0).filter(v=>v>0).reverse(); // 古い順に並べる
     if(vals.length < 2) return null;
-    const first = vals[vals.length-1], last = vals[0];
+    const first = vals[0], last = vals[vals.length-1]; // 最古→最新
     const diff  = last - first;
     const pct   = Math.abs(diff).toFixed(1);
     const improving = higherBetter ? diff > 0 : diff < 0;
