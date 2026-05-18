@@ -1062,8 +1062,8 @@ function renderTrendComment(games) {
     const flat  = Math.abs(diff) < 2;
     if(flat) return { cls:'trend-flat', icon:'→', text:`横ばい傾向（直近5試合 avg ${(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)}%）` };
     return improving
-      ? { cls:'trend-up',   icon:'↑', text:`改善傾向 ${pct}%上昇（直近5試合）` }
-      : { cls:'trend-down', icon:'↓', text:`悪化傾向 ${pct}%下降（直近5試合）` };
+      ? { cls:'trend-up',   icon:'↑', text:`改善傾向（直近5試合で${pct}%${higherBetter?'上昇':'低下'}）` }
+      : { cls:'trend-down', icon:'↓', text:`悪化傾向（直近5試合で${pct}%${higherBetter?'低下':'上昇'}）` };
   }
 
   const metrics = [
