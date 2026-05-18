@@ -1049,11 +1049,12 @@ function renderConclusion(g) {
    ======================================== */
 function renderTrendComment(games) {
   if(games.length < 2) { document.getElementById('team-trend-comment').innerHTML=''; return; }
-  const recent = games.slice(0, Math.min(5, games.length));
-  const older  = games.slice(Math.min(5, games.length));
+  // 日付降順（新しい順）にソートして直近5試合を取得
+  const sorted = [...games].sort((a,b)=>(b['GameID']||'').localeCompare(a['GameID']||''));
+  const recent = sorted.slice(0, Math.min(5, sorted.length)).reverse(); // 古い順に戻す（グラフと同方向）
 
   function trendOf(key, higherBetter) {
-    const vals = recent.map(g=>parseFloat(g[key])||0).filter(v=>v>0).reverse(); // 古い順に並べる
+    const vals = recent.map(g=>parseFloat(g[key])||0).filter(v=>v>0);
     if(vals.length < 2) return null;
     const first = vals[0], last = vals[vals.length-1]; // 最古→最新
     const diff  = last - first;
