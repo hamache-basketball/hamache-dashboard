@@ -1156,14 +1156,13 @@ function drawSankey(g, playerRows) {
   // 高さをデータに応じて動的に計算
   const minH = 320, maxH = 520;
   const H = Math.min(maxH, Math.max(minH, offense * 5));
-  const W=660, T=24, B=40;
+  const W=700, T=24, B=40;
+  const H = Math.min(maxH, Math.max(minH, offense * 5));
   const drawH = H-T-B;
   const scale = v => Math.max(5, Math.round(v/offense*drawH));
   const GAP=4;
-
-  // X座標（列位置）
-  const NW=12; // ノード幅（細く）
-  const X = {off:20, mid:148, p2p3:282, result:416, total:516, final:594};
+  const NW=12;
+  const X = {off:60, mid:192, p2p3:328, result:464, total:562, final:642};
 
   // 各ノードの高さ・Y座標計算
   const hFGA  = scale(fga),  hTO = scale(to),  hFT = scale(fta);
