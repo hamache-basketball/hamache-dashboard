@@ -1152,15 +1152,15 @@ function drawSankey(g, playerRows) {
     dr:    '#7a8099', // ディフェンスリバウンド（グレー）
   };
 
-  // レイアウト定数
-  const W=680, H=420, T=30, B=20;
+  // レイアウト定数（サイズを縮小・余白を増やして収まりやすく）
+  const W=660, H=320, T=24, B=16;
   const drawH = H-T-B;
-  const scale = v => Math.max(6, Math.round(v/offense*drawH));
-  const GAP=5;
+  const scale = v => Math.max(5, Math.round(v/offense*drawH));
+  const GAP=4;
 
   // X座標（列位置）
-  const NW=14; // ノード幅
-  const X = {off:20, mid:155, p2p3:295, result:435, total:540, final:620};
+  const NW=12; // ノード幅（細く）
+  const X = {off:20, mid:148, p2p3:282, result:416, total:516, final:594};
 
   // 各ノードの高さ・Y座標計算
   const hFGA  = scale(fga),  hTO = scale(to),  hFT = scale(fta);
@@ -1205,22 +1205,22 @@ function drawSankey(g, playerRows) {
   // ラベルを描く関数（右側）
   function labelR(x,y,h,name,val,col) {
     const cy=y+h/2;
-    return `<text font-size="10" font-family="var(--font-mono)" fill="var(--color-text-secondary)" x="${x+NW+6}" y="${cy-5}" dominant-baseline="central">${name}</text>`+
-           `<text font-size="12" font-weight="500" font-family="var(--font-mono)" fill="${col}" x="${x+NW+6}" y="${cy+7}" dominant-baseline="central">${val}</text>`;
+    return `<text font-size="10" font-family="monospace" fill="#9098b0" x="${x+NW+6}" y="${cy-5}" dominant-baseline="central">${name}</text>`+
+           `<text font-size="12" font-weight="500" font-family="monospace" fill="${col}" x="${x+NW+6}" y="${cy+7}" dominant-baseline="central">${val}</text>`;
   }
 
   // ラベルを描く関数（左側）
   function labelL(x,y,h,name,val,col) {
     const cy=y+h/2;
-    return `<text font-size="10" font-family="var(--font-mono)" fill="var(--color-text-secondary)" x="${x-4}" text-anchor="end" y="${cy-5}" dominant-baseline="central">${name}</text>`+
-           `<text font-size="12" font-weight="500" font-family="var(--font-mono)" fill="${col}" x="${x-4}" text-anchor="end" y="${cy+7}" dominant-baseline="central">${val}</text>`;
+    return `<text font-size="10" font-family="monospace" fill="#9098b0" x="${x-4}" text-anchor="end" y="${cy-5}" dominant-baseline="central">${name}</text>`+
+           `<text font-size="12" font-weight="500" font-family="monospace" fill="${col}" x="${x-4}" text-anchor="end" y="${cy+7}" dominant-baseline="central">${val}</text>`;
   }
 
   // バッジ（終端）
   function badge(x,y,w,h,label,val,col,bgOpacity=0.12) {
     return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${col}" opacity="${bgOpacity}" stroke="${col}" stroke-width="0.5"/>`+
-           `<text font-size="10" font-family="var(--font-mono)" fill="${col}" x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" dominant-baseline="central">${label}</text>`+
-           `<text font-size="12" font-weight="500" font-family="var(--font-mono)" fill="${col}" x="${x+w/2}" y="${y+h/2+8}" text-anchor="middle" dominant-baseline="central">${val}</text>`;
+           `<text font-size="10" font-family="monospace" fill="${col}" x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" dominant-baseline="central">${label}</text>`+
+           `<text font-size="12" font-weight="500" font-family="monospace" fill="${col}" x="${x+w/2}" y="${y+h/2+8}" text-anchor="middle" dominant-baseline="central">${val}</text>`;
   }
 
   // SVG組み立て
@@ -1231,7 +1231,7 @@ function drawSankey(g, playerRows) {
   let lx=20;
   legend.forEach(([lbl,col])=>{
     s+=`<rect x="${lx}" y="6" width="8" height="8" rx="2" fill="${col}"/>`;
-    s+=`<text font-size="9" font-family="var(--font-mono)" fill="var(--color-text-secondary)" x="${lx+11}" y="10" dominant-baseline="central">${lbl}</text>`;
+    s+=`<text font-size="9" font-family="monospace" fill="#9098b0" x="${lx+11}" y="10" dominant-baseline="central">${lbl}</text>`;
     lx+=lbl.length*6+26;
   });
 
